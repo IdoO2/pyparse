@@ -1,7 +1,20 @@
-# Based on C++ Qt documentation found at
-# http://doc.qt.io/qt-5/qtreeview.html
-
 # Note on performance: in our case, consider setting `uniformRowHeights = True`
+
+# Test
+# This tree would be represented as
+# branch1
+#   b1s1
+#   b1s2
+#   subbranch1
+#     b1s1s1
+#     b1s1s2
+data = [
+    [
+        'branch1',
+        'b1s1', 'b1s2', ['subbranch1',
+            'b1s1s1', 'b1s1s2']
+    ]
+]
 
 # Helpers
 import inspect
@@ -13,58 +26,41 @@ from PyQt5.QtWidgets import (QTreeView, QApplication,
                             QMainWindow, QWidget, QVBoxLayout)
 from PyQt5.QtCore import QDir, Qt, QStringListModel
 
-# from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QTreeWidget, QTreeWidgetItem)
-
 # Application
-#from model import TreeItem, TreeModel
-
 from qmodel import Tree
 
-
 class PyOutline(QMainWindow):
-
-    def __init__(self):
-        super().__init__()
-
+    '''
+    Handles UI: creates window, layout, adds a tree
+    '''
     def buildWindow(self, tree):
         self.content = QVBoxLayout()
         self.content.addWidget(tree)
         self.setCentralWidget(tree)
         self.setGeometry(300, 300, 300, 150)
-        self.setWindowTitle('Some file')
+        self.setWindowTitle('Code browser')
 
-
+# Run Qt application
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    view = PyOutline()
+    ui = PyOutline()
 
-    data = [
-        'root',
-        [
-            'branch1', 'b1s1', 'b1s2',
-            ['subbranch1', 'b1s1s1', 'b1s1s2']
-        ]
-    ]
+    # Model
+    data = Tree(data, 'Some file')
 
-    # data = TreeModel('Filename', None)
-    data = Tree(data)
+    # Test operations
+    data.addRow(1, 'NewBranch') # Test: add item at root index 1
+    data.addRow(0, 'NewSubBranch', data.item(1)) # Test: add items at item index 0 of root index 2
 
-    # root = TreeItem('root', None)
-    # child = TreeItem('ooga', root)
-    # root.appendChild(child)
-
-    # # Test with ListModel: apprently doesn’t display children
-    # root = QStringListModel()
-    # child = QStringListModel(['one', 'two', 'three'], root)
-    # treeData = QStringListModel(['four', 'five', 'six'], child)
-
+    # View
     tree = QTreeView()
     tree.setModel(data)
 
-    #pprint(inspect.getmembers(tree))
+    # Test operation
+    data.item(1).setData('SubItemName', Qt.DisplayRole) # Test: change text of root index 1
 
-    view.buildWindow(tree)
-    view.show()
+    ui.buildWindow(tree)
+    ui.show()
 
     sys.exit(app.exec_())
