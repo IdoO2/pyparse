@@ -16,6 +16,48 @@ data = [
     ]
 ]
 
+# Example file:
+# 1. class Master():
+# 2.   randval = 0
+# 3.   def __init__(self):
+# 4.     self.randval = 1
+# 5.     def change():
+# 6.       self.randval = 3
+
+data = [
+    ['Master',
+        'randval', ['__init__',
+            'change']]
+]
+
+# We will need a mapping from file string to model,
+# for two reasons:
+# - when a line / line are updated, wee need to find the model reference easily
+# - we need to uniquely identify possible homographs
+# Note: this means frequent updating; “extreme” case: user deletes 30 lines
+# Workflow:
+# - user changes line 3
+# - lookup mapping: line 3 holds (-2, 1)
+# - lookup model at [3-2][1]
+# - if symbol is modified, update model
+# Example 2:
+# - user changes line 4
+# - nothing found: reparse lines from 3 to 4 to extract symbols
+# Example 3:
+# - user deletes line 3
+# - reparse lines 3-2 to 3
+# - update model at [3-2][1] accordingly
+# - lookup mapping for children of 3
+# - recurse on line 5
+mapping = [
+    { 1: 0 },
+    { 2: (-1, 0) },
+    { 3: (-2, 1) },
+    { 4: None },
+    { 5: (-2, 0) },
+    { 6: None }
+]
+
 # Helpers
 import inspect
 from pprint import pprint
