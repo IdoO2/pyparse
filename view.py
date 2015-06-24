@@ -98,16 +98,18 @@ class Parser():
         while True:
             update = input('Make a change (format: `3 def __init__(self, newarg):i`):')
             lst = self.parseArgs(update)
-            if not lst:
+            if not lst: # There is nothing recorded on this line; obviously should change later
                 continue
-            line, val, rel_idx, loc_idx, idx, txt = lst
-            if idx == 0:
+            line, val, rel_idx, loc_idx, idxs, txt = lst
+            if len(idxs) is 1:
                 if txt is not val:
-                    data.item(idx).setText(val)
+                    data.item(idxs[0]).setText(val)
             else:
-                parent_idx = line + rel_idx
-                parent = data.item(parent_idx)
-                parent.child(loc_idx).setText(val)
+                child = data.item(idxs[0]) # top level parent
+                for level in idxs[1:]:
+                    child = child.child(level)
+                if child.text() is not val:
+                    child.setText(val)
 
     def parseArgs(self, update):
         '''
@@ -120,7 +122,7 @@ class Parser():
         - int rel_idx relation of line to previous lines
         - in local_idx index of symbol in its scope
         - idx idx actual index in list
-        - str txt redundant with val while parser doesn’t parse
+        - str txt redundant with val as long as parser doesn’t parse
         '''
         line = int(update[0])
         val = update[2:]
@@ -128,12 +130,27 @@ class Parser():
         if line >= len(self.map) or self.map[line] is None:
             return False
 
-        rel_idx = int(self.map[line][0])
+        rel_idx = int(self.map[line][0]) # <= 0
         local_idx = int(self.map[line][1])
-        idx = self.map[line][rel_idx + local_idx]
+        idxs = self.walkIndexes(line)
         txt = self.map[line][2]
-        return line, val, rel_idx, local_idx, idx, txt
+        return line, val, rel_idx, local_idx, idxs, txt
 
+    def walkIndexes(self, line, *lst):
+        '''
+        Determine indexes down the hierarchy
+        rel_idx <= 0
+        Implementation note: given how python handles memory,
+        it probably isn’t necessary to pass idx_list around
+        '''
+        idx_list = lst[0] if len(lst) > 0 else []
+        if self.map[line][0] < 0: # relative index
+            parent_line = line + self.map[line][0]
+            self.walkIndexes(parent_line, idx_list)
+
+        idx_list += [self.map[line][1]] # local index
+
+        return idx_list
 
 # Run Qt application
 if __name__ == '__main__':
