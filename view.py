@@ -50,11 +50,11 @@ data = [
 # - lookup mapping for children of 3
 # - recurse on line 5
 mapping = [
-    [(0, 0)],
-    [(-1, 0)],
-    [(-2, 1)],
+    [(0, 0, 'Master | class')],
+    [(-1, 0, 'randval | func')],
+    [(-2, 1, '__init_ | func')],
     [None],
-    [(-2, 0)],
+    [(-2, 0, 'change | func')],
     [None]
 ]
 
