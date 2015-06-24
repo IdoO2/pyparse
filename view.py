@@ -82,6 +82,59 @@ class PyOutline(QMainWindow):
         self.setGeometry(300, 300, 300, 150)
         self.setWindowTitle('Code browser')
 
+class Parser():
+    'Simple POC for parser I/O'
+    map = [
+        [0, 0, 'Master | class'],
+        [-1, 0, 'randval | func'],
+        [-2, 1, '__init_ | func'],
+        None,
+        [-2, 0, 'change | func'],
+        None
+    ]
+
+    def loop(self):
+        'For testing purposes takes user input to update model'
+        while True:
+            update = input('Make a change (format: `3 def __init__(self, newarg):i`):')
+            lst = self.parseArgs(update)
+            if not lst:
+                continue
+            line, val, rel_idx, loc_idx, idx, txt = lst
+            if idx == 0:
+                if txt is not val:
+                    data.item(idx).setText(val)
+            else:
+                parent_idx = line + rel_idx
+                parent = data.item(parent_idx)
+                parent.child(loc_idx).setText(val)
+
+    def parseArgs(self, update):
+        '''
+        Very basic arguments parsing:
+        input format is `3 some code`
+        where `3` is a line number and the rest is the content of the line
+        Returns
+        - int line number
+        - str val
+        - int rel_idx relation of line to previous lines
+        - in local_idx index of symbol in its scope
+        - idx idx actual index in list
+        - str txt redundant with val while parser doesn’t parse
+        '''
+        line = int(update[0])
+        val = update[2:]
+
+        if line >= len(self.map) or self.map[line] is None:
+            return False
+
+        rel_idx = int(self.map[line][0])
+        local_idx = int(self.map[line][1])
+        idx = self.map[line][rel_idx + local_idx]
+        txt = self.map[line][2]
+        return line, val, rel_idx, local_idx, idx, txt
+
+
 # Run Qt application
 if __name__ == '__main__':
     app = QApplication(sys.argv)
@@ -104,5 +157,8 @@ if __name__ == '__main__':
 
     ui.buildWindow(tree)
     ui.show()
+
+    run = Parser()
+    run.loop()
 
     sys.exit(app.exec_())
