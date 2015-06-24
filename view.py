@@ -50,12 +50,12 @@ data = [
 # - lookup mapping for children of 3
 # - recurse on line 5
 mapping = [
-    { 1: 0 },
-    { 2: (-1, 0) },
-    { 3: (-2, 1) },
-    { 4: None },
-    { 5: (-2, 0) },
-    { 6: None }
+    [(0, 0)],
+    [(-1, 0)],
+    [(-2, 1)],
+    [None],
+    [(-2, 0)],
+    [None]
 ]
 
 # Helpers
