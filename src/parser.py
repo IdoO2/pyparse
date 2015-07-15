@@ -6,6 +6,9 @@ class Parser():
 
     # Example data, see `view`
     map = [
+        # line | line | content
+        # 0 position of 0 level index
+        # 1 position in parent
         [0, 0, 'Master | class'],
         [-1, 0, 'randval | func'],
         [-2, 1, '__init_ | func'],
