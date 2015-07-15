@@ -22,6 +22,12 @@ Should work with any variants of Python 3 and  PyQt 5.
 
 ## Changelog
 
+### Update 2015-07-15
+
+Reasonable cleanup of repository. Relevant code has been moved to `src` folder.
+Functionally no difference with previous version.
+
+
 ### Update 2015-07-14
 
 We are now able to basically run a plugin. Relevant files are `stplugin.py`,
