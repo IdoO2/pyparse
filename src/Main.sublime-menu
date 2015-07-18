@@ -1,0 +1,23 @@
+[
+{
+	"id": "tools",
+	"children":
+	[
+		{
+			"id" : "PyParse",
+			"caption": "PyParse",
+			"children":
+			[
+			{
+				"caption" : "mark file",
+				"command" : "pyparse_mark"
+			},
+			{
+				"caption" : "unmark file",
+				"command" : "pyparse_unmark"
+			}
+			]
+		}
+	]
+}
+]
