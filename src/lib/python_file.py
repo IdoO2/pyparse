@@ -48,8 +48,7 @@ class PythonFile (File) :
                 i += 1
                 continue
             i += 1
-
-    return '\n'.join(txt)
+        return '\n'.join(txt)
 
     def __multiLine(self, txt, i, patern) :
         """Process multiline instruction.
@@ -135,12 +134,14 @@ if __name__ == '__main__':
     fd.close()
 
     # for f in ['very_simple.py'] :
-    for f in ['simple_oo.py', 'very_simple.py', 'complex.py'] * 50 :
+    for f in ['simple_oo.py', 'very_simple.py']  :
+        print (f)
         fd = open(TEST_DIRECTORY + f, 'r')
         test = PythonFile(f, TEST_DIRECTORY, fd.read(), DB_CONN, 4)
         fd.close()
-        # for l in test.SCODE :
+        for l in test.SCODE :
             # if type(l) in [Class, Function] : l.show()
-            # print(l)
-            # l.show()
+            print (l)
+            l.show()
             # print(l.stype)
+        print()

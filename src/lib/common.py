@@ -63,7 +63,7 @@ class Symbol(object) :
     def show(self) :
         """Prints line-number and initial-code of each CodeLine stored in Symbol"""
         for x in self.code :
-            print ('{0:4d}: {1}'.format(x.nline, x.icode))
+            x.show()
 
     def showSym(self) :
         """Prints attributes of the current Symbol (use mostly in debugg)"""
