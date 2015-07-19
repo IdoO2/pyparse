@@ -116,9 +116,13 @@ class CodeLine(object) :
 
         return int(res / CodeLine.indent)
 
-    def show(self) :
+    def showCL(self) :
         """Shows CodeLine attributes"""
         pprint (vars(self))
+
+    def show(self) :
+        """Shows line code"""
+        print ('{0:4d}:{1:2d}| {2}'.format(self.nline, self.context, self.icode))
 
     def getVariable(self) :
         """Exposes crucial variable. Used when the code is scanned."""
