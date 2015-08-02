@@ -48,7 +48,7 @@ class PythonFile (File) :
                 i += 1
                 continue
             i += 1
-        return '\n'.join(txt)
+        return txt
 
     def __multiLine(self, txt, i, patern) :
         """Process multiline instruction.
@@ -75,7 +75,7 @@ class PythonFile (File) :
         """Scan a file code and return an array reprensting the file structure"""
         CodeLine.indent = self.IDENT # set ident for codeline
 
-        arr = ccode.split("\n") ; res = []
+        res = []
         fifo = [None] # stores the context (ie the current symbol). first is global
         sym = lambda: fifo[-1] # current symbol
         #accessors depending on symbol presence:
@@ -84,8 +84,8 @@ class PythonFile (File) :
         styp = lambda: sym().stype if type(sym()) in CLIST else None
         i = 0
 
-        while i < len(arr) :
-            l = CodeLine(i+1, arr[i], cont())
+        while i < len(ccode) :
+            l = CodeLine(i+1, ccode[i], cont())
             i += 1
 
             typ, lvl = l.getVariable()
@@ -134,7 +134,7 @@ if __name__ == '__main__':
     fd.close()
 
     # for f in ['very_simple.py'] :
-    for f in ['simple_oo.py', 'very_simple.py']  :
+    for f in ['simple_oo.py', 'very_simple.py'] :
         print (f)
         fd = open(TEST_DIRECTORY + f, 'r')
         test = PythonFile(f, TEST_DIRECTORY, fd.read(), DB_CONN, 4)
