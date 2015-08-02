@@ -18,8 +18,15 @@ class Pyparse():
     """
     """
 
-    def __init__(self, fulltext):
-        self.__plaintext = fulltext
+    def __init__(self):
+        # Parser instance
+        self.__data = Parser()
+
+        # Model
+        self.__model = Tree(self.__data.getSymbolTree(), '')
+
+        # Open user interface
+        self.__show()
 
     def update(self, fulltext):
         '''
@@ -38,7 +45,6 @@ class Pyparse():
         '''
         Call parser on text
         '''
-        self.__data = Parser()
         self.__data.updateWith(self.__plaintext)
         return str(self.__data)
 
@@ -48,14 +54,12 @@ class Pyparse():
         '''
         return str(self.__data.getSymbolTree())
 
-    def gui(self):
+    def __show(self):
         """ Lauch the application user interface
 
             Builds the application and view,
             injects the model
         """
-        # Model
-        self.__model = Tree(self.__data.getSymbolTree(), 'Some random file')
 
         app = QApplication(sys.argv)
         ui = PyOutline()
@@ -64,13 +68,12 @@ class Pyparse():
         tree = QTreeView()
         tree.setModel(self.__model)
 
+        # (For now) UI needs to access model
+        # Sign that application is badly lain out?
         ui.buildWindow(tree, self.__model)
         ui.show()
 
         sys.exit(app.exec_())
 
-# Test
-psr = Pyparse('ooga')
-psr.parse()
-psr.gui()
-psr.update('ooga')
+# Launch application
+psr = Pyparse()
