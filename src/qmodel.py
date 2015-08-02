@@ -30,9 +30,9 @@ class Tree(QStandardItemModel):
     The method `addRow` should be delegated to TreeItem
     (ie self.invisibleRootItem should be instance of TreeItem)
     '''
-#    def __init__(self, tree, filename):
-#        QStandardItemModel.__init__(self)
-#        self.__addBranches(tree)
+    def __init__(self, tree, filename):
+        QStandardItemModel.__init__(self)
+        self.__addBranches(tree)
 
     def __addBranches(self, branches, parent=None):
         '''
@@ -53,7 +53,8 @@ class Tree(QStandardItemModel):
         '''
         Set filename in column header
         '''
-        self.setHorizontalHeaderLabels([filename])
+        title = 'Inspecting "' + filename + '"'
+        self.setHorizontalHeaderLabels([title])
 
     def setBranches(self, branches):
         '''

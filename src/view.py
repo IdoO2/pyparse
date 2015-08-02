@@ -42,8 +42,10 @@ from pprint import pprint
 
 # Libraries
 import sys
+import os
 from PyQt5.QtWidgets import (QTreeView, QApplication,
-                            QMainWindow, QWidget, QVBoxLayout)
+                            QMainWindow, QWidget, QVBoxLayout,
+                            QFileDialog)
 from PyQt5.QtCore import QDir, Qt, QStringListModel
 
 # Application
@@ -54,37 +56,30 @@ class PyOutline(QMainWindow):
     '''
     Handles UI: creates window, layout, adds a tree
     '''
-    def buildWindow(self, tree):
+
+    def __init__(self):
+        QMainWindow.__init__(self)
+        self.__buildMenu()
+
+    def buildWindow(self, tree, model):
+        self.__model = model
         self.content = QVBoxLayout()
         self.content.addWidget(tree)
         self.setCentralWidget(tree)
         self.setGeometry(300, 300, 300, 150)
         self.setWindowTitle('Code browser')
 
-# Run Qt application
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
+    def __buildMenu(self):
+        file_menu = self.menuBar().addMenu('File')
+        action_open = file_menu.addAction('Open file')
+        action_open.setShortcut('Ctrl+O')
+        action_open.triggered.connect(self.openFile)
 
-    ui = PyOutline()
+    def openFile(self):
+        filename, type = QFileDialog.getOpenFileName(self, 'Open file for inspection', os.getenv('HOME'))
 
-    # Model
-    data = Tree(data, 'Some file')
+        self.__model.setFileName(filename)
 
-    # Test operations
-    #data.addRow(1, 'NewBranch') # Test: add item at root index 1
-    #data.addRow(0, 'NewSubBranch', data.item(1)) # Test: add items at item index 0 of root index 2
-
-    # View
-    tree = QTreeView()
-    tree.setModel(data)
-
-    # Test operation
-    data.item(1).setData('SubItemName', Qt.DisplayRole) # Test: change text of root index 1
-
-    ui.buildWindow(tree)
-    ui.show()
-
-    run = Parser(data)
-    run.loop()
-
-    sys.exit(app.exec_())
+        with open(filename, 'r') as f:
+            data = f.read()
+            self.setWindowTitle(data[:10])
