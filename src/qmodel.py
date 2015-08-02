@@ -30,12 +30,15 @@ class Tree(QStandardItemModel):
     The method `addRow` should be delegated to TreeItem
     (ie self.invisibleRootItem should be instance of TreeItem)
     '''
-    def __init__(self, tree, filename):
-        QStandardItemModel.__init__(self)
-        self.setHorizontalHeaderLabels([filename])
-        self.__addBranches(tree)
+#    def __init__(self, tree, filename):
+#        QStandardItemModel.__init__(self)
+#        self.__addBranches(tree)
 
     def __addBranches(self, branches, parent=None):
+        '''
+        Use to fully built tree to populate tree
+        Must be done on a clean tree
+        '''
         parent = parent if parent else self.invisibleRootItem()
         for branch in branches:
             if isinstance(branch, str):
@@ -45,6 +48,21 @@ class Tree(QStandardItemModel):
                 item = TreeItem(branch[0])
                 parent.insertRow(0, item)
                 item.addBranches(branch[1:], item)
+
+    def setFileName(self, filename):
+        '''
+        Set filename in column header
+        '''
+        self.setHorizontalHeaderLabels([filename])
+
+    def setBranches(self, branches):
+        '''
+        Pass fully built tree to populate tree
+        Clears existing tree if data exists,
+        use with care
+        '''
+        # :delete existing data
+        self.__addBranches(branches)
 
     def addRow(self, index, branch, parent=None):
         '@see TreeItem.addBranches'
