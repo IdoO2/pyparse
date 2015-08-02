@@ -58,18 +58,31 @@ class PyOutline(QMainWindow):
     '''
 
     def __init__(self):
+        """ Create window
+        """
         QMainWindow.__init__(self)
-        self.__buildMenu()
 
     def buildWindow(self, tree, model):
+        """ Create window
+
+            Sets default window title,
+            adds menu bar items,
+            actually lays out the window,
+            stores the model for further update
+        """
+        self.__buildMenu()
         self.__model = model
         self.content = QVBoxLayout()
         self.content.addWidget(tree)
         self.setCentralWidget(tree)
         self.setGeometry(300, 300, 300, 150)
-        self.setWindowTitle('Code browser')
+        self.setWindowTitle()
 
     def __buildMenu(self):
+        """ Add menu bar elements
+
+            With related event-action bindings
+        """
         # File
         file_menu = self.menuBar().addMenu('&File')
         action_open = file_menu.addAction('&Open file')
@@ -89,13 +102,30 @@ class PyOutline(QMainWindow):
 
 
     def openFile(self):
+        """ Menu action: open file
+
+           Provide file chooser
+           Given file, set file name for view and text for parser
+        """
         filename, type = QFileDialog.getOpenFileName(self, 'Open file for inspection', os.getenv('HOME'))
 
+        # Implementation note: it is the parser’s responsibility to
+        # check if file is valid Python
+        # Should we lock the file before reading?
+        if not os.path.isfile(filename) or not os.access(filename, os.R_OK):
+            return
+
         self.__model.setFileName(filename)
+        self.setWindowTitle(filename)
 
         with open(filename, 'r') as f:
             data = f.read()
-            self.setWindowTitle(data[:10])
+
+    def setWindowTitle(self, *filename):
+        if len(filename) is 0:
+            super().setWindowTitle('PyParse')
+        else:
+            super().setWindowTitle(filename[0] + ' — Pyparse')
 
     def collapseAll(self):
         """ Collapse all tree levels """
