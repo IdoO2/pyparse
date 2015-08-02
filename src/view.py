@@ -70,10 +70,23 @@ class PyOutline(QMainWindow):
         self.setWindowTitle('Code browser')
 
     def __buildMenu(self):
-        file_menu = self.menuBar().addMenu('File')
-        action_open = file_menu.addAction('Open file')
+        # File
+        file_menu = self.menuBar().addMenu('&File')
+        action_open = file_menu.addAction('&Open file')
         action_open.setShortcut('Ctrl+O')
         action_open.triggered.connect(self.openFile)
+
+        action_export = file_menu.addAction('Export to &XMI')
+        action_export.triggered.connect(self.createXmi)
+
+        # View
+        view_menu =self.menuBar().addMenu('&View')
+        action_collapse = view_menu.addAction('&Collapse all')
+        action_collapse.triggered.connect(self.collapseAll)
+
+        action_expand = view_menu.addAction('&Expand all')
+        action_expand.triggered.connect(self.expandAll)
+
 
     def openFile(self):
         filename, type = QFileDialog.getOpenFileName(self, 'Open file for inspection', os.getenv('HOME'))
@@ -83,3 +96,15 @@ class PyOutline(QMainWindow):
         with open(filename, 'r') as f:
             data = f.read()
             self.setWindowTitle(data[:10])
+
+    def collapseAll(self):
+        """ Collapse all tree levels """
+        pass
+
+    def expandAll(self):
+        """ Expand all tree levels """
+        pass
+
+    def createXmi(self):
+        """ Create XMI file """
+        pass
