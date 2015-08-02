@@ -48,10 +48,6 @@ from PyQt5.QtWidgets import (QTreeView, QApplication,
                             QFileDialog)
 from PyQt5.QtCore import QDir, Qt, QStringListModel
 
-# Application
-from qmodel import Tree
-from parser import Parser
-
 class PyOutline(QMainWindow):
     '''
     Handles UI: creates window, layout, adds a tree
