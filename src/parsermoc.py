@@ -46,9 +46,9 @@ class Parser():
                 pass # ... on to model
 
     def __setLineEndings(self, full_text):
-        """
-        Set line endings (unix or windows)
-        Must be one of `Unix` or `Windows`
+        """ Set line endings (unix or windows)
+
+            Must be one of `Unix` or `Windows`
         """
         find_le = re.compile('(\n|\c\r)')
         le_found = find_le.match(full_text)

@@ -49,12 +49,10 @@ from PyQt5.QtWidgets import (QTreeView, QApplication,
 from PyQt5.QtCore import QDir, Qt, QStringListModel
 
 class PyOutline(QMainWindow):
-    '''
-    Handles UI: creates window, layout, adds a tree
-    '''
+    """ Handles UI: creates window, layout, adds a tree """
 
     def __init__(self):
-        """ Create window
+        """ Create window, set parser and model instances
         """
         QMainWindow.__init__(self)
 
@@ -118,6 +116,10 @@ class PyOutline(QMainWindow):
             data = f.read()
 
     def setWindowTitle(self, *filename):
+        """ Set a normalised window title
+
+            Based on file name & application name
+        """
         if len(filename) is 0:
             super().setWindowTitle('PyParse')
         else:
