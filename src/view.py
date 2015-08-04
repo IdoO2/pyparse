@@ -48,6 +48,10 @@ from PyQt5.QtWidgets import (QTreeView, QApplication,
                             QFileDialog)
 from PyQt5.QtCore import QDir, Qt, QStringListModel
 
+# Application
+from parsermoc import Parser
+from qmodel import Tree
+
 class PyOutline(QMainWindow):
     """ Handles UI: creates window, layout, adds a tree """
 
@@ -56,7 +60,20 @@ class PyOutline(QMainWindow):
         """
         QMainWindow.__init__(self)
 
-    def buildWindow(self, tree, model):
+        # Parser instance
+        self.__data = Parser()
+
+        # Model
+        self.__model = Tree(self.__data.getSymbolTree(), '')
+
+        # View
+        self.__tree = QTreeView()
+        self.__tree.setModel(self.__model)
+
+        # Window layout with tree
+        self.__buildWindow()
+
+    def __buildWindow(self):
         """ Create window
 
             Sets default window title,
@@ -65,10 +82,9 @@ class PyOutline(QMainWindow):
             stores the model for further update
         """
         self.__buildMenu()
-        self.__model = model
         self.content = QVBoxLayout()
-        self.content.addWidget(tree)
-        self.setCentralWidget(tree)
+        self.content.addWidget(self.__tree)
+        self.setCentralWidget(self.__tree)
         self.setGeometry(300, 300, 300, 150)
         self.setWindowTitle()
 
@@ -136,3 +152,10 @@ class PyOutline(QMainWindow):
     def createXmi(self):
         """ Create XMI file """
         pass
+
+# Launch application
+app = QApplication(sys.argv)
+ui = PyOutline()
+ui.show()
+
+sys.exit(app.exec_())
