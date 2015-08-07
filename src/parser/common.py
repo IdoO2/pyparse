@@ -8,7 +8,7 @@ This file implements 2 general class usable for every languages:
     . File: base class of every file (based on the db table 'file')
 """
 
-from .db_toolkit import *
+from .db_toolkit import DBC
 from .conf import *
 from pprint import pprint
 
@@ -19,9 +19,9 @@ class Symbol(object) :
 
     ### CONSTRUCTOR
 
-    def __init__(self, id_file, code, dbcon) :
+    def __init__(self, id_file, code) :
         """Basic constructor: initialized attributes and Symbol registered"""
-        self.dbcon = dbcon      # Connection instance (for database)
+        self.DBC = DBC()
         self.id = None          # ID of the symbol
         self.id_file = id_file  # ID of the file
         self.stype = code.type  # type of symbol like analyzed in first line
@@ -35,28 +35,16 @@ class Symbol(object) :
 
     def __register(self) :
         """Register a Symbol in databse using the Connection instance self.dbcon"""
-        dic = { # preparing data to send in insert
-          'tab': "symbol",
-          'col': ["id_file", "id_type", "ini_line"],
-          'val': [str(self.id_file), str(self.stype), str(self.iline)]
-        }
-        res = insert(dic, self.dbcon.cursor(), dbg=False)
+        values = [str(self.id_file), str(self.stype), str(self.iline)]
+        res = self.DBC.addSymbol(values)
         if not res : LOG('Err on register')
         else :
             self.id = self.__getID() # sets id when it's correctly registered
 
     def __getID(self) :
-        """Get the ID of a Symbol from the databse"""
-        dic = {
-          'tab': "symbol",
-          'col': ["id_symbol"], #finds with the file id and the init line
-          'whr': "id_file='" + str(self.id_file) + \
-           "' AND ini_line='"+ str(self.iline) + '\';'
-        }
-        res = select(dic, self.dbcon.cursor(), dbg=False)
-        if not res : LOG('Err on getID')
-        else :
-            return res[0][0] # return first line and first column of result
+        """Gets current file ID in database"""
+        values = [self.id_file, self.iline]
+        return self.DBC.getSymbolID(values)
 
     ### PUBLIC METHODS
 
@@ -71,17 +59,8 @@ class Symbol(object) :
 
     def updateEline(self) :
         """Updates Symbol end line when its scanning is done"""
-        dic = {
-          'tab': "symbol",
-          'set': [["end_line", str(self.iline + len(self.code))]],
-          #finds with the file id and the init line
-          'whr': "id_file='" + str(self.id_file) + \
-            "' AND ini_line='"+ str(self.iline) + '\';'
-        }
-        res = update(dic, self.dbcon.cursor(), dbg=True)
-        if not res : LOG('Err on updateEline')
-        else :
-            return res
+        values = [self.iline + len(self.code) - 1, self.id_file, self.iline]
+        return self.DBC.updateEndLine(values)
 
     def addCode(self, code) :
         """Add a instance of CodeLine to self.code array"""
@@ -93,9 +72,9 @@ class Parser (object) :
 
     ### CONSTRUCTOR
 
-    def __init__(self, fname, fpath, code, dbcon) :
+    def __init__(self, fname, fpath, code) :
         """Basic constructor: initialized attributes and File registered"""
-        self.DBCON = dbcon  # Connection instance (for database)
+        self.DBC = DBC()
         self.FNAME = fname  # file name
         self.FPATH = fpath  # file path
         self.ICODE = code   # initiale file code
@@ -109,12 +88,8 @@ class Parser (object) :
 
     def __register(self) :
         """Registers Python file in database"""
-        dic = {
-          'tab': "file",
-          'col': ["fname", "fpath"],
-          'val': [self.FNAME, self.FPATH]
-        }
-        res = insert(dic, self.DBCON.cursor(), dbg=False)
+        values = [self.FNAME, self.FPATH]
+        res = self.DBC.addFile(values)
         if not res :
             LOG('Err on register')
         else :
@@ -122,19 +97,8 @@ class Parser (object) :
 
     def __getID(self) :
         """Gets current file ID in database"""
-        dic = {
-          'tab': "file",
-          'col': ["id_file"],
-          # finds using name and path attributes
-          'whr': "fname='" + self.FNAME + \
-            "' AND fpath='"+ self.FPATH + '\';'
-        }
-        res = select(dic, self.DBCON.cursor(), dbg=False)
-        if not res :
-            LOG('Err on getID')
-            return False
-        else :
-            return res[0][0]
+        values = [self.FNAME, self.FPATH]
+        return self.DBC.getFileID(values)
 
     def __preProcess(self) :
         """Abstract: method used for preprocessing the file"""

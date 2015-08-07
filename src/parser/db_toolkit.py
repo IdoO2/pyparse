@@ -10,76 +10,89 @@ The aim of this wrapper is to normalize database operations.
 import sqlite3
 from .conf import *
 
-def insert(dic, dbc, dbg=False) :
-    """Insert takes dic['tab'] dic['col'] dic['val'] & db Cursor
-    => return a Bool"""
-    sql = "INSERT INTO " + dic['tab']
-    sql += " (" + ', '.join(dic['col']) + ") "
-    sql += "VALUES ('" + '\', \''.join(dic['val']) + "');"
+class DBC():
+    def __init__(self):
+        '''
+        - establish connection
+        - assert params are correct
+        - init query
+        '''
+        self.DB_CONN = sqlite3.connect(DB_SYMBOL)
+        self.DB_CURS = self.DB_CONN.cursor()
+        self.DB_CURS.execute('PRAGMA synchronous = OFF;')
+        self.DB_CONN.commit()
 
-    if dbg : print(sql)
 
-    try:
+    def addSymbol(self, values):
+        '''
+        - assert symbol info is ok
+        - update query
+        '''
+        sql = 'INSERT INTO symbol ("id_file", "id_type", "ini_line") VALUES '
+        sql += "('" + '\', \''.join(values) + "');"
+        return self.__save(sql)
 
-        dbc.execute(sql)
-    except :
-        LOG('Issue while inserting data in db.')
-        LOG(sql)
-        dbc.close()
-        return False
-    dbc.close()
-    return True
 
-def select(dic, dbc, dbg=False) :
-    """Select takes dic['tab'] dic['col'] dic['whr'] & db Cursor
-    => return an array """
-    sql = "SELECT " + ' '.join(dic['col'])
-    sql += " FROM " + dic['tab']
-    sql += " WHERE " + dic['whr']
+    def addFile(self, values):
+        sql = 'INSERT INTO file ("fname", "fpath") VALUES '
+        sql += "('" + '\', \''.join(values) + "');"
+        return self.__save(sql)
 
-    if dbg : print(sql)
+    def getFileID(self, values):
+        sql = 'SELECT id_file FROM file WHERE fname=\'' + str(values[0])
+        sql += '\' AND fpath=\'' + str(values[1]) + '\';'
+        res = self.__select(sql)
+        if res : return res[0][0]
+        return None
 
-    dbc.execute(sql)
-    res = dbc.fetchall()
+    def getSymbolID(self, values):
+        sql = 'SELECT id_symbol FROM symbol WHERE id_file=\'' + str(values[0])
+        sql += '\' AND ini_line=\'' + str(values[1]) + '\';'
+        res = self.__select(sql)
+        if res : return res[0][0]
+        return None
 
-    dbc.close()
-    return res
+    def updateEndLine(self, values) :
+        sql = "UPDATE symbol SET\n"
+        sql += "\tend_line='" + str(values[0]) + "'\n"
+        sql += "WHERE id_file='" + str(values[1])
+        sql += "' AND ini_line='" + str(values[2]) + "';"
+        return self.__save(sql)
 
-def update(dic, dbc, dbg=False) :
-    """Update takes dic['tab'] dic['set'] dic['whr'] & db Cursor
-    => return a Bool"""
-    sql = "UPDATE " + dic['tab'] + "\nSET\n"
-    sql += ',\n'.join(['\t' + '=\''.join(x) + '\'' for x in dic['set']])
-    sql += "\nWHERE " + dic['whr']
+    def updateSymbol(self, values) :
+        sql = "UPDATE " + values[0] + " SET\n\t"
+        sql += (',\n\t'.join(['=\''.join(x) + "'" for x in values[1]]))
+        sql += "\nWHERE id_symbol = "
+        sql += "(SELECT id_symbol FROM symbol "
+        sql += "WHERE id_file = '" + str(values[2]) + "' "
+        sql += "AND ini_line = '" + str(values[3]) + "');"
+        return self.__save(sql)
 
-    if dbg : print(sql)
+    def __save(self, sql):
+        try:
+            self.DB_CURS.execute(sql)
+            self.DB_CONN.commit()
+        except :
+            LOG('Issue while inserting data in db.')
+            LOG(sql)
+            return False
+        return True
 
-    try:
-        dbc.execute(sql)
-    except :
-        LOG('Issue while inserting data in db.')
-        LOG(sql)
-        dbc.close()
-        return False
+    def __select(self, sql):
+        try:
+            self.DB_CURS.execute(sql)
+        except :
+            LOG('Issue while inserting data in db.')
+            LOG(sql)
+            return False
+        return self.DB_CURS.fetchall()
 
-    dbc.close()
-    return True
+    def close(self): self.DB_CURS.close()
 
-def delete(dic, dbc, dbg=False) :
-    """Delete takes dic['tab'] dic['whr'] & db Cursor
-    => return a Bool"""
-    sql = "DELETE FROM " + dic['tab']
-    sql += " WHERE " + dic['whr']
 
-    if dbg : print(sql)
 
-    try:
-        dbc.execute(sql)
-    except :
-        LOG('Issue while deleting data in db.')
-        LOG(sql)
-        dbc.close()
-        return False
+if __name__ == '__main__':
+    test = DBC()
+    test.addFile(['edzed', './ezdzed'])
+    test.DB_CONN.commit()
 
-    dbc.close()
-    return True
