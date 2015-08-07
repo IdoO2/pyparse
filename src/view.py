@@ -8,11 +8,11 @@
 # 5.     def change():
 # 6.       self.randval = 3
 
-data = [
-    ['Master',
-        'randval', ['__init__',
-            'change']]
-]
+# data = [
+#     ['Master',
+#         'randval', ['__init__',
+#             'change']]
+# ]
 
 # Example mapping found in `parser`
 # We will need a mapping from file string to model,
@@ -42,49 +42,121 @@ from pprint import pprint
 
 # Libraries
 import sys
+import os
 from PyQt5.QtWidgets import (QTreeView, QApplication,
-                            QMainWindow, QWidget, QVBoxLayout)
+                            QMainWindow, QWidget, QVBoxLayout,
+                            QFileDialog)
 from PyQt5.QtCore import QDir, Qt, QStringListModel
 
 # Application
+from parsermoc import Parser
 from qmodel import Tree
-from parser import Parser
+from parser.python_file import PythonParser
 
 class PyOutline(QMainWindow):
-    '''
-    Handles UI: creates window, layout, adds a tree
-    '''
-    def buildWindow(self, tree):
+    """ Handles UI: creates window, layout, adds a tree """
+
+    def __init__(self):
+        """ Create window, set parser and model instances
+        """
+        QMainWindow.__init__(self)
+
+        # Parser instance
+        self.__data = PythonParser()
+
+        # Model
+        self.__model = Tree(self.__data.getSymbolTree(), '')
+
+        # View
+        self.__tree = QTreeView()
+        self.__tree.setModel(self.__model)
+
+        # Window layout with tree
+        self.__buildWindow()
+
+    def __buildWindow(self):
+        """ Create window
+
+            Sets default window title,
+            adds menu bar items,
+            actually lays out the window,
+            stores the model for further update
+        """
+        self.__buildMenu()
         self.content = QVBoxLayout()
-        self.content.addWidget(tree)
-        self.setCentralWidget(tree)
+        self.content.addWidget(self.__tree)
+        self.setCentralWidget(self.__tree)
         self.setGeometry(300, 300, 300, 150)
-        self.setWindowTitle('Code browser')
+        self.setWindowTitle()
 
-# Run Qt application
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
+    def __buildMenu(self):
+        """ Add menu bar elements
 
-    ui = PyOutline()
+            With related event-action bindings
+        """
+        # File
+        file_menu = self.menuBar().addMenu('&File')
+        action_open = file_menu.addAction('&Open file')
+        action_open.setShortcut('Ctrl+O')
+        action_open.triggered.connect(self.openFile)
 
-    # Model
-    data = Tree(data, 'Some file')
+        action_export = file_menu.addAction('Export to &XMI')
+        action_export.triggered.connect(self.createXmi)
 
-    # Test operations
-    #data.addRow(1, 'NewBranch') # Test: add item at root index 1
-    #data.addRow(0, 'NewSubBranch', data.item(1)) # Test: add items at item index 0 of root index 2
+        # View
+        view_menu =self.menuBar().addMenu('&View')
+        action_collapse = view_menu.addAction('&Collapse all')
+        action_collapse.triggered.connect(self.collapseAll)
 
-    # View
-    tree = QTreeView()
-    tree.setModel(data)
+        action_expand = view_menu.addAction('&Expand all')
+        action_expand.triggered.connect(self.expandAll)
 
-    # Test operation
-    data.item(1).setData('SubItemName', Qt.DisplayRole) # Test: change text of root index 1
 
-    ui.buildWindow(tree)
-    ui.show()
+    def openFile(self):
+        """ Menu action: open file
 
-    run = Parser(data)
-    run.loop()
+           Provide file chooser
+           Given file, set file name for view and text for parser
+        """
+        filename, type = QFileDialog.getOpenFileName(self, 'Open file for inspection', os.getenv('HOME'))
 
-    sys.exit(app.exec_())
+        # Implementation note: it is the parser’s responsibility to
+        # check if file is valid Python
+        # Should we lock the file before reading?
+        if not os.path.isfile(filename) or not os.access(filename, os.R_OK):
+            return
+
+        self.__model.setFileName(filename)
+        self.setWindowTitle(filename)
+
+        with open(filename, 'r') as f:
+            data = f.read()
+
+    def setWindowTitle(self, *filename):
+        """ Set a normalised window title
+
+            Based on file name & application name
+        """
+        if len(filename) is 0:
+            super().setWindowTitle('PyParse')
+        else:
+            super().setWindowTitle(filename[0] + ' — Pyparse')
+
+    def collapseAll(self):
+        """ Collapse all tree levels """
+        pass
+
+    def expandAll(self):
+        """ Expand all tree levels """
+        pass
+
+    def createXmi(self):
+        """ Create XMI file """
+        pass
+
+# Launch application
+app = QApplication(sys.argv)
+ui = PyOutline()
+ui.show()
+
+sys.exit(app.exec_())

@@ -22,6 +22,19 @@ Should work with any variants of Python 3 and  PyQt 5.
 
 ## Changelog
 
+### Update 2015-08-02
+
+Another, more radical cleanup, after project shifted from ST plugin to standalone application.
+Relevant files are still in the `src` folder. Concerns need better separation, but roughly `main.py` is the entry point and orchestrates application setup; `parsermoc.py` is a placeholder parser; `qmodel.py` is the model; `view.py` should handle the user interface but is getting something of a controller’s responsibility.
+
+The application can be run using the `run` executable at root.
+
+### Update 2015-07-15
+
+Reasonable cleanup of repository. Relevant code has been moved to `src` folder.
+Functionally no difference with previous version.
+
+
 ### Update 2015-07-14
 
 We are now able to basically run a plugin. Relevant files are `stplugin.py`,

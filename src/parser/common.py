@@ -8,8 +8,8 @@ This file implements 2 general class usable for every languages:
     . File: base class of every file (based on the db table 'file')
 """
 
-import db_toolkit as DBT
-from conf import *
+from .db_toolkit import *
+from .conf import *
 from pprint import pprint
 
 
@@ -40,7 +40,7 @@ class Symbol(object) :
           'col': ["id_file", "id_type", "ini_line"],
           'val': [str(self.id_file), str(self.stype), str(self.iline)]
         }
-        res = DBT.insert(dic, self.dbcon.cursor(), dbg=False)
+        res = insert(dic, self.dbcon.cursor(), dbg=False)
         if not res : LOG('Err on register')
         else :
             self.id = self.__getID() # sets id when it's correctly registered
@@ -53,7 +53,7 @@ class Symbol(object) :
           'whr': "id_file='" + str(self.id_file) + \
            "' AND ini_line='"+ str(self.iline) + '\';'
         }
-        res = DBT.select(dic, self.dbcon.cursor(), dbg=False)
+        res = select(dic, self.dbcon.cursor(), dbg=False)
         if not res : LOG('Err on getID')
         else :
             return res[0][0] # return first line and first column of result
@@ -78,7 +78,7 @@ class Symbol(object) :
           'whr': "id_file='" + str(self.id_file) + \
             "' AND ini_line='"+ str(self.iline) + '\';'
         }
-        res = DBT.update(dic, self.dbcon.cursor(), dbg=True)
+        res = update(dic, self.dbcon.cursor(), dbg=True)
         if not res : LOG('Err on updateEline')
         else :
             return res
@@ -87,7 +87,7 @@ class Symbol(object) :
         """Add a instance of CodeLine to self.code array"""
         self.code.append(code)
 
-class File (object) :
+class Parser (object) :
 
     """Common file and attributes used in any languages"""
 
@@ -114,7 +114,7 @@ class File (object) :
           'col': ["fname", "fpath"],
           'val': [self.FNAME, self.FPATH]
         }
-        res = DBT.insert(dic, self.DBCON.cursor(), dbg=False)
+        res = insert(dic, self.DBCON.cursor(), dbg=False)
         if not res :
             LOG('Err on register')
         else :
@@ -129,7 +129,7 @@ class File (object) :
           'whr': "fname='" + self.FNAME + \
             "' AND fpath='"+ self.FPATH + '\';'
         }
-        res = DBT.select(dic, self.DBCON.cursor(), dbg=False)
+        res = select(dic, self.DBCON.cursor(), dbg=False)
         if not res :
             LOG('Err on getID')
             return False
