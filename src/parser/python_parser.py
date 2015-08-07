@@ -69,7 +69,6 @@ class PythonParser (Parser) :
             PC.LOG("UNK: " + txt[i])
 
     ### PUBLIC METHOD
-
     # under work...
     def scanCode(self, ccode) :
         """Scan a file code and return an array reprensting the file structure"""
@@ -78,10 +77,12 @@ class PythonParser (Parser) :
         res = []
         fifo = [None] # stores the context (ie the current symbol). first is global
         sym = lambda: fifo[-1] # current symbol
+        clas = lambda: fifo[1] if len(fifo) > 1 and type(fifo[1]) is Class else None
         #accessors depending on symbol presence:
         add = lambda l: sym().addCode(l) if type(sym()) in CLIST else res.append(l)
         cont = lambda: sym().id if type(sym()) in CLIST else 0
         styp = lambda: sym().stype if type(sym()) in CLIST else None
+
         i = 0
 
         while i < len(ccode) :
@@ -99,30 +100,42 @@ class PythonParser (Parser) :
                 fifo.pop()
 ####
             if typ in [SYM_CLASS, SYM_FCT_MUL] :
-                tmp = CDIC[typ](self.ID, l, self.DBCON)
+                tmp = CDIC[typ](self.ID, l)
                 fifo.append(tmp)
+                l.context = cont()
                 res.append(tmp)
                 continue
             if typ in SYM_MET_MUL :
-                tmp = CDIC[typ](self.ID, l, self.DBCON, cont())
+                tmp = CDIC[typ](self.ID, l, cont())
                 fifo.append(tmp)
+                l.context = cont()
+                clas().addCode(l)
                 res.append(tmp)
                 continue
 ####
             if typ in SYM_ONE and typ not in SYM_MET_ONE :
-                res.append(CDIC[typ](self.ID, l, self.DBCON))
+                res.append(CDIC[typ](self.ID, l))
+                l.context = res[-1].id
                 continue
             if typ in SYM_ONE and typ in SYM_MET_ONE :
-                res.append(CDIC[typ](self.ID, l, self.DBCON, cont()))
+                res.append(CDIC[typ](self.ID, l, cont()))
+                l.context = res[-1].id
+                clas().addCode(l)
                 continue
 ####
             if typ == SYM_GLO_VAR :
-                res.append(CDIC[typ](self.ID, l, self.DBCON))
+                res.append(CDIC[typ](self.ID, l))
                 continue
             if typ == SYM_ATTR_CLASS :
-                res.append(CDIC[typ](self.ID, l, self.DBCON, cont()))
+                res.append(CDIC[typ](self.ID, l, cont()))
+                clas().addCode(l)
                 continue
 ####
-            add(l)
+            if clas():
+                clas().addCode(l)
+            else : add(l)
+####
+        for x in res :
+            if type(x) in CLIST :
+                x.updateEline()
         return res
-
