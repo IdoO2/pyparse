@@ -1,4 +1,0 @@
-[
-  { "keys": ["ctrl+shift+a"], "command": "pyparse_mark" },
-  { "keys": ["ctrl+shift+d"], "command": "pyparse_unmark" }
-]
