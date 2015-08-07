@@ -126,22 +126,3 @@ class PythonParser (Parser) :
             add(l)
         return res
 
-### Object Testing
-if __name__ == '__main__':
-    DB_CONN = sqlite3.connect(':memory:')
-    fd = open(DB_STRUCT, 'r')
-    DB_CONN.executescript(fd.read())
-    fd.close()
-
-    # for f in ['very_simple.py'] :
-    for f in ['simple_oo.py', 'very_simple.py'] :
-        print (f)
-        fd = open(TEST_DIRECTORY + f, 'r')
-        test = PythonFile(f, TEST_DIRECTORY, fd.read(), DB_CONN, 4)
-        fd.close()
-        for l in test.SCODE :
-            # if type(l) in [Class, Function] : l.show()
-            print (l)
-            l.show()
-            # print(l.stype)
-        print()
