@@ -9,7 +9,7 @@ The 'analyze' method contains the third level of analyze: recuperation of
 the missings Symbol attributes.
 """
 
-from common import Symbol
+from .common import Symbol
 
 
 class Import(Symbol) :

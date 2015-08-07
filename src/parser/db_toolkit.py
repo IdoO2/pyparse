@@ -8,7 +8,7 @@ The aim of this wrapper is to normalize database operations.
 """
 
 import sqlite3
-from conf import *
+from .conf import *
 
 def insert(dic, dbc, dbg=False) :
     """Insert takes dic['tab'] dic['col'] dic['val'] & db Cursor

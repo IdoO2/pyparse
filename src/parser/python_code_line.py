@@ -10,7 +10,7 @@ This result is then used when the file is scanned for delimiting each context.
 """
 
 import re
-from python_common import *
+from .python_common import *
 from pprint import pprint
 
 

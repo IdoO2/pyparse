@@ -12,7 +12,7 @@ This file implements some constants providing facilities for:
 """
 
 import re
-from python_type import *
+from .python_type import *
 
 ### SYMBOL CONSTANT -- use for typing symbol
 

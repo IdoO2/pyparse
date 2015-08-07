@@ -8,11 +8,11 @@
 # 5.     def change():
 # 6.       self.randval = 3
 
-data = [
-    ['Master',
-        'randval', ['__init__',
-            'change']]
-]
+# data = [
+#     ['Master',
+#         'randval', ['__init__',
+#             'change']]
+# ]
 
 # Example mapping found in `parser`
 # We will need a mapping from file string to model,
@@ -51,6 +51,7 @@ from PyQt5.QtCore import QDir, Qt, QStringListModel
 # Application
 from parsermoc import Parser
 from qmodel import Tree
+from parser.python_file import PythonParser
 
 class PyOutline(QMainWindow):
     """ Handles UI: creates window, layout, adds a tree """
@@ -61,7 +62,7 @@ class PyOutline(QMainWindow):
         QMainWindow.__init__(self)
 
         # Parser instance
-        self.__data = Parser()
+        self.__data = PythonParser()
 
         # Model
         self.__model = Tree(self.__data.getSymbolTree(), '')

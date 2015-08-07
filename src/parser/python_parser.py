@@ -9,13 +9,13 @@ PreProcess of a file and scanning structure are defined here.
 
 import re
 import sqlite3
-from conf import *
-from common import *
-from python_type import *
-from python_code_line import CodeLine
-from python_common import *
+from .conf import *
+from .common import *
+from .python_type import *
+from .python_code_line import CodeLine
+from .python_common import *
 
-class PythonFile (File) :
+class PythonParser (Parser) :
 
     """Specific code for handling a Python file"""
 
