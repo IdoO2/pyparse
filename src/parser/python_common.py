@@ -91,28 +91,3 @@ SYM_MET = SYM_MET_MUL + SYM_MET_ONE
 SYM_MUL = [SYM_CLASS, SYM_FCT_MUL, SYM_DOCS_MUL] + SYM_MET_MUL
 
 
-### REGEX -- use across the analyzer for code parsing
-RDIC = {
-  'se_docs' : re.compile('"""|\'\'\''),
-  'se_cons' : re.compile(' *def *__init__'),
-  'se_priv_meth' : re.compile(' *def *__'),
-  'se_space': re.compile('^( +)'),
-  'se_ncmt': re.compile('(#.*)'), #renvoie tout ce qui n'est pas un commentaire
-  'se_str': re.compile("\"([^\"]*)\"|\'([^\']*)\'"),
-  'se_meth': re.compile('def _{2}'), #vérifie si une méthode est privé
-  'se_var': re.compile('==|<=|!=|>=|='), #regex utilisé pour trouver une variable
-  'se_ol': re.compile(': *(\w)'),
-
-  'import_from': re.compile('from ([^ ]+) import (\*|.+)'),
-  'import': re.compile('import ([^ ]+)'),
-  'class': re.compile('class ([^(\s:]+).([^)]*)'),
-  'fonction': re.compile('^def (.+(?=[(])).([^)]*)'),
-  'method': re.compile('def ([^(]+).([^)]*)'),
-  'variable': re.compile('([^[ =]+)'),
-  'cl_comm': re.compile('\s,|,\s'), #selectionne les arguments quelque soit leur présentation
-  'cl_idet': re.compile('[\t ]+'), #sélectionne l'indentation
-  'syntaxe': re.compile('[\+\.;,\(\)\[\]{]') #nettoie une ligne de la syntaxe pour optimiser son parcours
-}
-
-
-
