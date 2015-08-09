@@ -37,11 +37,14 @@ RDIC = {
 }
 
 class Import(Symbol) :
-    def __init__(self, id_file, code) :
-        super().__init__(id_file, code)
+    def __init__(self) :
+        super().__init__()
         self.module = ''
         self.element = ''
         self.alias = ''
+
+    def register(self, id_file, code) :
+        super().register(id_file, code)
         self.analyze()
         self.update()
 
@@ -65,9 +68,12 @@ class Import(Symbol) :
         return self.DBC.updateSymbol(values)
 
 class Variable(Symbol) :
-    def __init__(self, id_file, code) :
-        super().__init__(id_file, code)
+    def __init__(self) :
+        super().__init__()
         self.name = ''
+
+    def register(self, id_file, code) :
+        super().register(id_file, code)
         self.analyze()
         self.update()
 
@@ -81,12 +87,16 @@ class Variable(Symbol) :
         return self.DBC.updateSymbol(values)
 
 class Function(Symbol) :
-    def __init__(self, id_file, code) :
-        super().__init__(id_file, code)
+    def __init__(self) :
+        super().__init__()
         self.name = ''
         self.args = []
+
+    def register(self, id_file, code) :
+        super().register(id_file, code)
         self.analyze()
         self.update()
+
 
     def analyze(self) :
         code = self.code[0].ccode
@@ -100,10 +110,13 @@ class Function(Symbol) :
         return self.DBC.updateSymbol(values)
 
 class Class(Symbol) :
-    def __init__(self, id_file, code) :
-        super().__init__(id_file, code)
+    def __init__(self) :
+        super().__init__()
         self.name = ''
         self.lega = []
+
+    def register(self, id_file, code) :
+        super().register(id_file, code)
         self.analyze()
         self.update()
 
@@ -118,10 +131,23 @@ class Class(Symbol) :
         values[1] = [['name', self.name], ['legacy', '|'.join(self.lega)]]
         return self.DBC.updateSymbol(values)
 
+    def show(self) :
+    # def __str__(self) :
+        """Prints line-number and initial-code of each CodeLine stored in Symbol"""
+        string = ''
+        idclass = self.id if 'id' in vars(self) else None
+        for x in self.code :
+            string += x.show(idclass) + '\n'
+        return string[:-1]
+
 class ClassAttribute(Symbol) :
-    def __init__(self, id_file, code, idclass) :
-        super().__init__(id_file, code)
+    def __init__(self) :
+        super().__init__()
         self.name = ''
+        self.idclass = ''
+
+    def register(self, id_file, code, idclass) :
+        super().register(id_file, code)
         self.idclass = idclass
         self.analyze()
         self.update()
@@ -136,14 +162,29 @@ class ClassAttribute(Symbol) :
         values[1] = [['name', self.name], ['id_class', str(self.idclass)]]
         return self.DBC.updateSymbol(values)
 
+    def show(self) :
+    # def __str__(self) :
+        """Prints line-number and initial-code of each CodeLine stored in Symbol"""
+        string = ''
+        idclass = self.idclass if 'idclass' in vars(self) else None
+        for x in self.code :
+            string += x.show(idclass) + '\n'
+        return string[:-1]
+
 class Method(Symbol) :
-    def __init__(self, id_file, code, idclass) :
-        super().__init__(id_file, code)
+    def __init__(self) :
+        super().__init__()
         self.name = ''
         self.args = []
+        self.idclass = ''
+
+
+    def register(self, id_file, code, idclass) :
+        super().register(id_file, code)
         self.idclass = idclass
         self.analyze()
         self.update()
+
 
     def analyze(self) :
         code = self.code[0].ccode
@@ -156,6 +197,15 @@ class Method(Symbol) :
         values[1] = [['name', self.name], ['args', '|'.join(self.args)],\
          ['id_class', str(self.idclass)]]
         return self.DBC.updateSymbol(values)
+
+    def show(self) :
+    # def __str__(self) :
+        """Prints line-number and initial-code of each CodeLine stored in Symbol"""
+        string = ''
+        idclass = self.idclass if 'idclass' in vars(self) else None
+        for x in self.code :
+            string += x.show(idclass) + '\n'
+        return string[:-1]
 
 class DocString(Symbol) :
     def __init__(self, id_file, code) :

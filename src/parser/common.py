@@ -19,7 +19,31 @@ class Symbol(object) :
 
     ### CONSTRUCTOR
 
-    def __init__(self, id_file, code) :
+    def __init__(self) :
+        """Basic constructor: initialized attributes and Symbol registered"""
+        self.DBC = None
+        self.id = None          # ID of the symbol
+        self.id_file = None  # ID of the file
+        self.stype = None  # type of symbol like analyzed in first line
+        self.iline = None # first line
+        self.eline = None # last line
+        self.uline = []         # use line
+        self.code = []      # array of CodeLine instance: store the contains of the symbol
+
+
+    def load(self, data) :
+        """Basic constructor: initialized attributes and Symbol registered"""
+        # self.DBC = DBC()
+        # self.id = None          # ID of the symbol
+        # self.id_file = id_file  # ID of the file
+        # self.stype = code.type  # type of symbol like analyzed in first line
+        # self.iline = code.nline # first line
+        # self.eline = code.nline # last line
+        # self.uline = []         # use line
+        # self.code = [code]      # array of CodeLine instance: store the contains of the symbol
+        # self.__register()       # register in db the symbol
+
+    def register(self, id_file, code) :
         """Basic constructor: initialized attributes and Symbol registered"""
         self.DBC = DBC()
         self.id = None          # ID of the symbol
@@ -29,11 +53,12 @@ class Symbol(object) :
         self.eline = code.nline # last line
         self.uline = []         # use line
         self.code = [code]      # array of CodeLine instance: store the contains of the symbol
-        self.__register()       # register in db the symbol
+        self.__save()       # register in db the symbol
+
 
     ### PRIVATE METHODS
 
-    def __register(self) :
+    def __save(self) :
         """Register a Symbol in databse using the Connection instance self.dbcon"""
         values = [str(self.id_file), str(self.stype), str(self.iline)]
         res = self.DBC.addSymbol(values)
@@ -49,9 +74,12 @@ class Symbol(object) :
     ### PUBLIC METHODS
 
     def show(self) :
+    # def __str__(self) :
         """Prints line-number and initial-code of each CodeLine stored in Symbol"""
+        string = ''
         for x in self.code :
-            x.show()
+            string += x.show() + '\n'
+        return string[:-1]
 
     def showSym(self) :
         """Prints attributes of the current Symbol (use mostly in debugg)"""
@@ -66,14 +94,18 @@ class Symbol(object) :
         """Add a instance of CodeLine to self.code array"""
         self.code.append(code)
 
-class Parser (object) :
+class File(object) :
 
     """Common file and attributes used in any languages"""
 
     ### CONSTRUCTOR
 
-    def __init__(self, fname, fpath, code) :
+    def __init__(self, fname, fpath) :
         """Basic constructor: initialized attributes and File registered"""
+        fd = open(fpath + fname, 'r')
+        code = fd.read()
+        fd.close()
+
         self.DBC = DBC()
         self.FNAME = fname  # file name
         self.FPATH = fpath  # file path
