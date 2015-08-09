@@ -2,20 +2,21 @@
 #!-*- coding: utf8 -*-
 # Author: Cyril RICHARD
 
+from parser.python_code_line import CodeLine
 from parser.conf import TEST_DIRECTORY
-from parser.python_parser import PythonParser
+from parser.python_file import PythonFile
 
 
 if __name__ == '__main__':
     for f in ['simple_oo.py', 'very_simple.py'] :
         print (f)
         fd = open(TEST_DIRECTORY + f, 'r')
-        test = PythonParser(f, TEST_DIRECTORY, fd.read(), 4)
+        test = PythonFile(f, TEST_DIRECTORY)
         fd.close()
         for l in test.SCODE :
-            # if type(l) in [Class] :
-                # l.show()
-            print (l)
+            if type(l) in [CodeLine] :
+                continue
+            print (l.show())
             # l.show()
         # #     # print(l.stype)
         print()

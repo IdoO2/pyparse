@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+#!-*- coding: utf8 -*-
+# Author: Daniel PATERSON
+
 # Note on performance: in our case, consider setting `uniformRowHeights = True`
 
 # Example file:
@@ -39,19 +43,23 @@
 # Helpers
 import inspect
 from pprint import pprint
+import pdb
 
 # Libraries
+import re
 import sys
 import os
 from PyQt5.QtWidgets import (QTreeView, QApplication,
                             QMainWindow, QWidget, QVBoxLayout,
-                            QFileDialog)
+                            QFileDialog, QAbstractItemView, QAction, qApp)
 from PyQt5.QtCore import QDir, Qt, QStringListModel
+from PyQt5.QtGui import QIcon
+
 
 # Application
-from parsermoc import Parser
 from qmodel import Tree
-from parser.python_file import PythonParser
+from parser.python_file import PythonFile
+from parser.db_toolkit import DBC
 
 class PyOutline(QMainWindow):
     """ Handles UI: creates window, layout, adds a tree """
@@ -62,7 +70,7 @@ class PyOutline(QMainWindow):
         QMainWindow.__init__(self)
 
         # Parser instance
-        self.__data = PythonParser()
+        self.__data = DBC()
 
         # Model
         self.__model = Tree(self.__data.getSymbolTree(), '')
@@ -72,6 +80,7 @@ class PyOutline(QMainWindow):
         self.__tree.setModel(self.__model)
 
         # Window layout with tree
+
         self.__buildWindow()
 
     def __buildWindow(self):
@@ -82,18 +91,20 @@ class PyOutline(QMainWindow):
             actually lays out the window,
             stores the model for further update
         """
-        self.__buildMenu()
-        self.content = QVBoxLayout()
-        self.content.addWidget(self.__tree)
-        self.setCentralWidget(self.__tree)
+        content = QVBoxLayout()
+        content.addWidget(self.__tree)
+        self.setLayout(content)
         self.setGeometry(300, 300, 300, 150)
+        self.setCentralWidget(self.__tree)
         self.setWindowTitle()
+        #self.menuBar()
 
     def __buildMenu(self):
         """ Add menu bar elements
 
             With related event-action bindings
         """
+
         # File
         file_menu = self.menuBar().addMenu('&File')
         action_open = file_menu.addAction('&Open file')
@@ -118,19 +129,18 @@ class PyOutline(QMainWindow):
            Provide file chooser
            Given file, set file name for view and text for parser
         """
-        filename, type = QFileDialog.getOpenFileName(self, 'Open file for inspection', os.getenv('HOME'))
+        filepath, _type = QFileDialog.getOpenFileName(self, 'Open file for inspection', os.getenv('HOME'))
 
-        # Implementation note: it is the parser’s responsibility to
-        # check if file is valid Python
-        # Should we lock the file before reading?
-        if not os.path.isfile(filename) or not os.access(filename, os.R_OK):
+        if not os.path.isfile(filepath) or not os.access(filepath, os.R_OK):
             return
+
+        filename = re.findall(r'[^/\\]+$', filepath)[0]
 
         self.__model.setFileName(filename)
         self.setWindowTitle(filename)
-
-        with open(filename, 'r') as f:
-            data = f.read()
+        print(self.__model)
+        # pfile = PythonFile(filename, filepath)
+        # pfile.process()
 
     def setWindowTitle(self, *filename):
         """ Set a normalised window title

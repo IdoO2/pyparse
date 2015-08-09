@@ -89,7 +89,13 @@ class DBC():
 
     def close(self): self.DB_CURS.close()
 
-
+    def getSymbolTree(self):
+        """ Return symbol tree """
+        return [
+            ['Master',
+                'randval', ['__init__',
+                    'change']]
+        ]
 
 if __name__ == '__main__':
     test = DBC()

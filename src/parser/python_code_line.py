@@ -16,7 +16,7 @@ from pprint import pprint
 
 class CodeLine(object) :
     """Class that represent a line of code and calculate it's type"""
-    indent = 4 # defaut indentation size
+    indent = 1 # defaut indentation size
 
     def __init__(self, nline, code, context) :
         """Initializes CodeLine attributes"""
@@ -120,9 +120,11 @@ class CodeLine(object) :
         """Shows CodeLine attributes"""
         pprint (vars(self))
 
-    def show(self) :
-        """Shows line code"""
-        print ('{0:4d}:{1:2d}| {2}'.format(self.nline, self.context, self.icode))
+    def show(self, idclass=None) :
+    # def __str__(self) :
+        """return string representation"""
+        idclass = idclass if idclass else -1
+        return ('{0:4d}:{1:2d}:{2:2d}| {3}'.format(self.nline, self.context, idclass, self.icode))
 
     def getVariable(self) :
         """Exposes crucial variable. Used when the code is scanned."""
