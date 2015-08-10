@@ -48,6 +48,12 @@ class Import(Symbol) :
         self.analyze()
         self.update()
 
+    def load(self, data) :
+        super().load(data)
+        self.module = data[7]
+        self.element = data[8]
+        self.alis = data[9]
+
     def analyze(self) :
         code = self.code[0].ccode
         code = re.sub(RDIC['cl_comm'], ',', code)
@@ -67,6 +73,10 @@ class Import(Symbol) :
          ['element', '|'.join(self.element)], ['alias', self.alias]]
         return self.DBC.updateSymbol(values)
 
+    def symbRepr(self) :
+        """Prints attributes of the current Symbol (use mostly in debugg)"""
+        return [str(self.module) + ' [' + str(self.iline) + ']'] + self.element.split('|')
+
 class Variable(Symbol) :
     def __init__(self) :
         super().__init__()
@@ -77,6 +87,10 @@ class Variable(Symbol) :
         self.analyze()
         self.update()
 
+    def load(self, data) :
+        super().load(data)
+        self.name = data[7]
+
     def analyze(self) :
         code = self.code[0].ccode
         self.name = RDIC['variable'].match(code).group(1)
@@ -85,6 +99,10 @@ class Variable(Symbol) :
         values = ['variable', '', self.id_file, self.iline]
         values[1] = [['name', self.name]]
         return self.DBC.updateSymbol(values)
+
+    def symbRepr(self) :
+        """Prints attributes of the current Symbol (use mostly in debugg)"""
+        return str(self.name) + ' [' + str(self.iline) + ']'
 
 class Function(Symbol) :
     def __init__(self) :
@@ -97,6 +115,10 @@ class Function(Symbol) :
         self.analyze()
         self.update()
 
+    def load(self, data) :
+        super().load(data)
+        self.name = data[7]
+        self.args = data[8]
 
     def analyze(self) :
         code = self.code[0].ccode
@@ -109,6 +131,10 @@ class Function(Symbol) :
         values[1] = [['name', self.name], ['args', '|'.join(self.args)]]
         return self.DBC.updateSymbol(values)
 
+    def symbRepr(self) :
+        """Prints attributes of the current Symbol (use mostly in debugg)"""
+        return str(self.name) + ' [' + str(self.iline) + ']'
+
 class Class(Symbol) :
     def __init__(self) :
         super().__init__()
@@ -120,6 +146,11 @@ class Class(Symbol) :
         self.analyze()
         self.update()
 
+    def load(self, data) :
+        super().load(data)
+        self.name = data[7]
+        self.lega = data[8]
+
     def analyze(self) :
         code = self.code[0].ccode
         head = RDIC['class'].match(code)
@@ -130,6 +161,11 @@ class Class(Symbol) :
         values = ['class', '', self.id_file, self.iline]
         values[1] = [['name', self.name], ['legacy', '|'.join(self.lega)]]
         return self.DBC.updateSymbol(values)
+
+    def symbRepr(self) :
+        """Prints attributes of the current Symbol (use mostly in debugg)"""
+        return str(self.name) + ' [' + str(self.iline) + ']'
+
 
     def show(self) :
     # def __str__(self) :
@@ -152,6 +188,11 @@ class ClassAttribute(Symbol) :
         self.analyze()
         self.update()
 
+    def load(self, data) :
+        super().load(data)
+        self.idclass = data[7]
+        self.name = data[8]
+
     def analyze(self) :
         code = self.code[0].ccode
         head = RDIC['class_attr'].match(code)
@@ -161,6 +202,10 @@ class ClassAttribute(Symbol) :
         values = ['class_attr', '', self.id_file, self.iline]
         values[1] = [['name', self.name], ['id_class', str(self.idclass)]]
         return self.DBC.updateSymbol(values)
+
+    def symbRepr(self) :
+        """Prints attributes of the current Symbol (use mostly in debugg)"""
+        return str(self.name) + ' [' + str(self.iline) + ']'
 
     def show(self) :
     # def __str__(self) :
@@ -178,13 +223,17 @@ class Method(Symbol) :
         self.args = []
         self.idclass = ''
 
-
     def register(self, id_file, code, idclass) :
         super().register(id_file, code)
         self.idclass = idclass
         self.analyze()
         self.update()
 
+    def load(self, data) :
+        super().load(data)
+        self.idclass = data[7]
+        self.name = data[8]
+        self.args = data[9]
 
     def analyze(self) :
         code = self.code[0].ccode
@@ -206,6 +255,11 @@ class Method(Symbol) :
         for x in self.code :
             string += x.show(idclass) + '\n'
         return string[:-1]
+
+    def symbRepr(self) :
+        """Prints attributes of the current Symbol (use mostly in debugg)"""
+        return str(self.name) + ' [' + str(self.iline) + ']'
+
 
 class DocString(Symbol) :
     def __init__(self, id_file, code) :

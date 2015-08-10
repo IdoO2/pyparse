@@ -21,7 +21,7 @@ class Symbol(object) :
 
     def __init__(self) :
         """Basic constructor: initialized attributes and Symbol registered"""
-        self.DBC = None
+        self.DBC = DBC()
         self.id = None          # ID of the symbol
         self.id_file = None  # ID of the file
         self.stype = None  # type of symbol like analyzed in first line
@@ -33,19 +33,14 @@ class Symbol(object) :
 
     def load(self, data) :
         """Basic constructor: initialized attributes and Symbol registered"""
-        # self.DBC = DBC()
-        # self.id = None          # ID of the symbol
-        # self.id_file = id_file  # ID of the file
-        # self.stype = code.type  # type of symbol like analyzed in first line
-        # self.iline = code.nline # first line
-        # self.eline = code.nline # last line
-        # self.uline = []         # use line
-        # self.code = [code]      # array of CodeLine instance: store the contains of the symbol
-        # self.__register()       # register in db the symbol
+        self.id = data[0]
+        self.id_file = data[1]
+        self.stype = data[2]
+        self.iline = data[3]
+        self.eline = data[4]
 
     def register(self, id_file, code) :
         """Basic constructor: initialized attributes and Symbol registered"""
-        self.DBC = DBC()
         self.id = None          # ID of the symbol
         self.id_file = id_file  # ID of the file
         self.stype = code.type  # type of symbol like analyzed in first line
@@ -83,7 +78,7 @@ class Symbol(object) :
 
     def showSym(self) :
         """Prints attributes of the current Symbol (use mostly in debugg)"""
-        pprint (vars(self))
+        return ''
 
     def updateEline(self) :
         """Updates Symbol end line when its scanning is done"""
