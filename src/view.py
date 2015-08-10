@@ -12,11 +12,8 @@
 # 5.     def change():
 # 6.       self.randval = 3
 
-# data = [
-#     ['Master',
-#         'randval', ['__init__',
-#             'change']]
-# ]
+data = [['Import', ['Tkinter [2]', 'Button', 'Frame', 'Label', 'Pack'], ['pdb [3]', 'set_trace']], ['Variable', 'a [38]'], ['Fonction', 'main1 [5]', 'main2 [7]', 'test [33]'], ['Classes', ['ClickCounter [11]', ['Attribut', 'count + [18]', 'label[]  [19]', 'label  [22]', 'button  [24]', 'count  [31]'], ['Constructeur', '__init__ [27]'], ['Methode Publique', 'main3 [13]', 'main4 [14]', 'click [17]', 'createWidgets [21]']]]]
+
 
 # Example mapping found in `parser`
 # We will need a mapping from file string to model,
@@ -73,7 +70,7 @@ class PyOutline(QMainWindow):
         self.__data = DBC()
 
         # Model
-        self.__model = Tree(self.__data.getSymbolTree(), '')
+        self.__model = Tree(data, '')
 
         # View
         self.__tree = QTreeView()

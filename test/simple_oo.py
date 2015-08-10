@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from Tkinter import Button, Frame, Label, Pack
+from pdb import set_trace
 
 def main1() : return 0
 
@@ -34,4 +35,3 @@ def test() :
  
 if __name__=="__main__":
     ClickCounter().mainloop()
-    a = "test"
