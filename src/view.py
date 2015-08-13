@@ -143,11 +143,11 @@ class PyOutline(QMainWindow):
 
     def collapseAll(self):
         """ Collapse all tree levels """
-        pass
+        self.__tree.collapseAll()
 
     def expandAll(self):
         """ Expand all tree levels """
-        pass
+        self.__tree.expandAll()
 
     def createXmi(self):
         """ Create XMI file """
