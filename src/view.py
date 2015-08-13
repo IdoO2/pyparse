@@ -102,6 +102,9 @@ class PyOutline(QMainWindow):
         action_export = file_menu.addAction('Export to &XMI')
         action_export.triggered.connect(self.createXmi)
 
+        action_exit = file_menu.addAction('&Quit')
+        action_exit.triggered.connect(self.close)
+
         # View
         view_menu =self.menuBar().addMenu('&View')
         action_collapse = view_menu.addAction('&Collapse all')
