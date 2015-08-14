@@ -20,9 +20,9 @@ class Parser():
     def getSymbolTree(self):
         """ Return symbol tree """
         return [
-            ['Master',
-                'randval', ['__init__',
-                    'change']]
+                [('Master', {'type': 'class'}),
+                    ('randval', {'type': 'method'}), [('__init__', {'type': 'method', 'signature': ['arg', '*args', '**kwargs']}),
+                    ('change', {'type': 'function'})]]
         ]
 
     def updateWith(self, file_contents):

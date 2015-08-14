@@ -14,11 +14,11 @@ class TreeItem(QStandardItem):
         """
         parent = parent if parent else self
         for branch in branches:
-            if isinstance(branch, str):
-                item = TreeItem(branch)
+            if isinstance(branch, tuple):
+                item = TreeItem(branch[0])
                 parent.appendRow(item)
             else:
-                item = TreeItem(branch[0])
+                item = TreeItem(branch[0][0])
                 parent.appendRow(item)
                 self.addBranches(branch[1:], item)
 
@@ -41,11 +41,11 @@ class Tree(QStandardItemModel):
         """
         parent = parent if parent else self.invisibleRootItem()
         for branch in branches:
-            if isinstance(branch, str):
-                item = TreeItem(branch)
+            if isinstance(branch, tuple):
+                item = TreeItem(branch[0])
                 parent.appendRow(item)
             else:
-                item = TreeItem(branch[0])
+                item = TreeItem(branch[0][0])
                 parent.insertRow(0, item)
                 item.addBranches(branch[1:], item)
 
