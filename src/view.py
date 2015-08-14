@@ -57,9 +57,12 @@ from PyQt5.QtGui import QIcon
 from qmodel import Tree
 from parser.python_file import PythonFile
 from parser.db_toolkit import DBC
+from exporter import Xmi
 
 class PyOutline(QMainWindow):
     """ Handles UI: creates window, layout, adds a tree """
+
+    __xmi = None
 
     def __init__(self):
         """ Create window, set parser and model instances
@@ -162,7 +165,17 @@ class PyOutline(QMainWindow):
 
     def createXmi(self):
         """ Create XMI file """
-        pass
+        if self.__xmi is None:
+            self.__xmi = Xmi()
+        try:
+            self.__xmi.setTree(self.__data.getSymbolTree())
+            self.__xmi.write('somewhere.xmi')
+        except ValueError:
+            pass # inform: bad format for data
+        except RuntimeError:
+            pass # inform: but should not be here
+        except OSError:
+            pass # inform: problem writing file
 
 # Launch application
 app = QApplication(sys.argv)
