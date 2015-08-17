@@ -56,18 +56,16 @@ class Xmi():
             toplevel = True
             parent = self.__tree
 
-        pprint(branches)
+        # pprint(branches)
         for branch in branches:
             type_ = type(branch)
-            pprint(branch)
-            print()
+            # pprint(branch)
+            # print()
             if type_ is tuple:
                 if branch[1]['type'] is 'class':
                     self.__addPackagedElement(parent, branch)
                 elif branch[1]['type'] is 'function':
                     node = self.__addOwnedOperation(parent, branch)
-                    if 'signature' in branch[1]:
-                        self.__addOwnedParameters(node, branch[1]['signature'])
                 elif branch[1]['type'] is 'attribute':
                     self.__addOwnedAttribute(parent, branch)
                 elif branch[1]['type'] is 'comment':
@@ -107,24 +105,29 @@ class Xmi():
         if 'visibility' in node[1]:
             attrs['visibility'] = node[1]['visibility']
 
-        return ET.SubElement(parent, 'ownedOperation', attrs)
+        scope = ET.SubElement(parent, 'ownedOperation', attrs)
+
+        if 'signature' in node[1]:
+            self.__addOwnedParameters(scope, node[1]['signature'])
+
+        return scope
 
     def __addOwnedAttribute(self, parent, node):
         """ ownedAttribute nodes represent a class attribute
         """
         print('_addOwnedAttribute')
-        attrs = {'name': node[1]['name']}
+        attrs = {'name': node[0]}
         attrs['xmi:id'] = '0'
         if 'type' in node[1]:
             attrs['xmi:type'] = node[1]['type']
-        if' visibilty' in node[1]:
-            attrs['visibility'] = node[1]['visibilty']
+        if 'visibility' in node[1]:
+            attrs['visibility'] = node[1]['visibility']
 
         return ET.SubElement(parent, 'ownedAttribute', attrs)
 
     def __addOwnedParameters(self, parent, signature):
         print('__addOwnedParameters')
-        for s in signature:
+        for s in range(len(signature)):
             ET.SubElement(parent, 'ownedParameter', {
                 'name': signature[s],
                 'xmi:id': '0'
