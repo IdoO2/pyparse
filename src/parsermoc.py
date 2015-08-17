@@ -21,8 +21,11 @@ class Parser():
         """ Return symbol tree """
         return [
                 [('Master', {'type': 'class'}),
-                    ('randval', {'type': 'method'}), [('__init__', {'type': 'method', 'signature': ['arg', '*args', '**kwargs']}),
-                    ('change', {'type': 'function'})]]
+                    ('This is a properly fake class', {'type': 'comment'}),
+                    ('__initialised', {'type': 'attribute', 'visibility': 'private'}),
+                    ('randval', {'type': 'function', 'visibility': 'public'}),
+                    [('__init__', {'type': 'function', 'signature': ['arg', '*args', '**kwargs'], 'visibility': 'private'}),
+                        ('change', {'type': 'function'})]]
         ]
 
     def updateWith(self, file_contents):
