@@ -1,6 +1,7 @@
 # Library; make this more granular
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+from os import path as ospath
 
 # Represents an item in the tree
 # Adds to QStandardItem a method to recursively add branche hierarchies
@@ -53,7 +54,8 @@ class Tree(QStandardItemModel):
         """
         Set filename in column header
         """
-        title = 'Inspecting "' + filename + '"'
+        path, name = ospath.split(filename)
+        title = 'Inspecting "{}" ({})'.format(name, path)
         self.setHorizontalHeaderLabels([title])
 
     def setBranches(self, branches):
