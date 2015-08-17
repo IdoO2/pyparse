@@ -57,6 +57,7 @@ class PyOutline(QMainWindow):
     """ Handles UI: creates window, layout, adds a tree """
 
     __xmi = None
+    __basepath = ''
 
     def __init__(self):
         """ Create window, set parser and model instances
@@ -145,7 +146,9 @@ class PyOutline(QMainWindow):
         if len(filename) is 0:
             super().setWindowTitle('PyParse')
         else:
-            super().setWindowTitle(filename[0] + ' — Pyparse')
+            path, name = os.path.split(filename[0])
+            self.__basepath = path
+            super().setWindowTitle('{} ({}) — Pyparse'.format(name, path))
 
     def collapseAll(self):
         """ Collapse all tree levels """
@@ -157,11 +160,19 @@ class PyOutline(QMainWindow):
 
     def createXmi(self):
         """ Create XMI file """
+        #filename, type = QFileDialog.getOpenFileName(self, 'Open file for inspection', os.getenv('HOME'))
+        root = self.__basepath != '' if self.__basepath != '' else os.getenv('HOME')
+        filename, type = QFileDialog.getSaveFileName(self, 'Open file for inspection', root)
+
+        path, name = os.path.split(filename)
+        if not os.access(path, os.R_OK):
+            return
+
         if self.__xmi is None:
             self.__xmi = Xmi()
         try:
             self.__xmi.setTree(self.__data.getSymbolTree())
-            self.__xmi.write('somewhere.xmi')
+            self.__xmi.write(filename)
         except ValueError:
             pass # inform: bad format for data
         except RuntimeError:

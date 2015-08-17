@@ -83,6 +83,7 @@ class Parser():
             Sets self.__indent, a dict with keys <str>type, <int>value
             Alternative to __setIndent
         """
+
         for line in self.__text_lines:
             ##indentRegex = '(?<=:' + le + ')^\s+'
             find_space = re.compile('^\s+')
