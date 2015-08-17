@@ -1,3 +1,4 @@
+from pprint import pprint
 import xml.etree.ElementTree as ET
 
 class Xmi():
@@ -5,6 +6,16 @@ class Xmi():
 
     # ET.Element
     __tree = None
+
+    # Map between human intuitive attribute names and XMI’s
+    __attr_map = {
+        'type': 'xmi:type',
+        'signature': 'signature'
+    }
+
+    __types = {
+        'class': 'uml:Class'
+    }
 
     def setTree(self, data):
         """ Public interface to recursive __addBranches
@@ -36,14 +47,94 @@ class Xmi():
                   (change, {type: function}) ] ] ]
             @raise ValueError
         """
+        toplevel = False
+
         if self.__tree is None:
             self.__tree = ET.Element('{http://www.w3.org/2005/Atom}feed', attrib={'{`namespace`}lang': 'en'})
 
-        parent = self.__tree if parent is None else parent
+        if parent is None:
+            toplevel = True
+            parent = self.__tree
 
+        pprint(branches)
         for branch in branches:
-            if isinstance(branch, tuple):
-                ET.SubElement(parent, branch[0])
-            else:
-                item = ET.SubElement(parent, branch[0][0])
-                self.__addBranches(branch[1:], item)
+            type_ = type(branch)
+            pprint(branch)
+            print()
+            if type_ is tuple:
+                if branch[1]['type'] is 'class':
+                    self.__addPackagedElement(parent, branch)
+                elif branch[1]['type'] is 'function':
+                    node = self.__addOwnedOperation(parent, branch)
+                    if 'signature' in branch[1]:
+                        self.__addOwnedParameters(node, branch[1]['signature'])
+                elif branch[1]['type'] is 'attribute':
+                    self.__addOwnedAttribute(parent, branch)
+                elif branch[1]['type'] is 'comment':
+                    self.__addOwnedComment(parent, branch[0])
+                else:
+                    raise ValueError('Unknown node type %s'.format(branch[1]['type']))
+            elif type_ is list:
+                if toplevel or 'type' in branch[0][1] and branch[0][1]['type'] is 'class':
+                    node = self.__addPackagedElement(parent, branch[0])
+                else:
+                    node = self.__addOwnedOperation(parent, branch[0])
+                self.__addBranches(branch[1:], node)
+
+    def __addPackagedElement(self, parent, node):
+        """ packagedElement nodes are the highest level entries
+        """
+        print('\t__addPackagedElement')
+        attrs = {
+            'name': node[0],
+            'xmi:type': node[1]['type'],
+            'xmi:id': '0'
+        }
+        if 'visibility' in node[1]:
+            attrs['visibility'] = node[1]['visibility']
+
+        return ET.SubElement(parent, 'packagedElement', attrs)
+
+    def __addOwnedOperation(self, parent, node):
+        """ ownedOperation nodes represent a callable (function, method)
+        """
+        print('\t__addOwnedOperation')
+        attrs = {
+            'name': node[0],
+            'xmi:type': 'uml:Operation',
+            'xmi:id': '0'
+        }
+        if 'visibility' in node[1]:
+            attrs['visibility'] = node[1]['visibility']
+
+        return ET.SubElement(parent, 'ownedOperation', attrs)
+
+    def __addOwnedAttribute(self, parent, node):
+        """ ownedAttribute nodes represent a class attribute
+        """
+        print('_addOwnedAttribute')
+        attrs = {'name': node[1]['name']}
+        attrs['xmi:id'] = '0'
+        if 'type' in node[1]:
+            attrs['xmi:type'] = node[1]['type']
+        if' visibilty' in node[1]:
+            attrs['visibility'] = node[1]['visibilty']
+
+        return ET.SubElement(parent, 'ownedAttribute', attrs)
+
+    def __addOwnedParameters(self, parent, signature):
+        print('__addOwnedParameters')
+        for s in signature:
+            ET.SubElement(parent, 'ownedParameter', {
+                'name': signature[s],
+                'xmi:id': '0'
+            })
+        return parent
+
+    def __addOwnedComment(self, parent, value):
+        print('__addOwnedComment')
+        ET.SubElement(parent, 'ownedComment', {
+            'body': value,
+            'xmi:id': '0'
+        })
+        return parent
