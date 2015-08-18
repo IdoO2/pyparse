@@ -107,6 +107,7 @@ class PyOutline(QMainWindow):
         action_export.triggered.connect(self.createXmi)
 
         action_exit = file_menu.addAction('&Quit')
+        action_exit.setShortcut('Ctrl+Q')
         action_exit.triggered.connect(self.close)
 
         # View
