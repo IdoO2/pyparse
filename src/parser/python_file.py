@@ -19,19 +19,19 @@ class PythonFile(File) :
 
     """Specific code for handling a Python file"""
 
-    __sublime_line_endings = {'Unix': '\n', 'Windows': '\c\r'}
-    __line_end = '\n'
+    # __sublime_line_endings = {'Unix': '\n', 'Windows': '\c\r'}
+    # __line_end = '\n'
     __text_lines = []
     __indent = {'type': 'spaces', 'value': 1}
 
     ### CONSTRUCTOR
 
-    def __init__(self, fname, fpath) :
+    def __init__(self) :
         """Adds missing attributes used in a Python file"""
-        super().__init__(fname, fpath)
-        self.IDENT = self.__setIndent()      # indentation size
-        self.CCODE = self.__preProcess(self.ICODE, self.IDENT) # clean code results of preprocess
-        self.SCODE = self.scanCode(self.CCODE) # scan file content and returns code structure
+        super().__init__()
+        self.IDENT = 0      # indentation size
+        self.CCODE = [] # clean code results of preprocess
+        self.SCODE = [] # scan file content and returns code structure
 
     ### PRIVATE METHOD
 
@@ -39,92 +39,50 @@ class PythonFile(File) :
         """Preprocessing a file:
             . tabulations are changed in whitespaces
             . multiline are changed in one line"""
-        txt = txt.replace('\t', ' ' * tab_len).split('\n')
+        print ('line end', self.LINE_END)
+        arr_txt = txt.replace('\t', ' ' * tab_len).split(self.LINE_END)
         i = 0
 
-        while (i < len(txt)) :
-            #si la déclaration est sur plusieurs lignes on la traite
-            if txt[i].replace(' ', '') and re.findall(r'\\|\(', txt[i][-1]) :
-                result = self.__multiLine(txt, i, txt[i][-1])
-                txt[i] = result['line']
-                #on ajoute des lignes vides
-                for i in range(i+1, result['idx']+1) :
-                    txt[i] = ''
-                i += 1
-                continue
+        while (i < len(arr_txt)) :
+            offset, lines = self.__multiLine(arr_txt[i:], "", 0, 0)
+            arr_txt[i] = lines[0]
+            for x in range(1, offset+1) :
+                arr_txt[i+x] = ''
             i += 1
-        return txt
+        return arr_txt
 
-    def __multiLine(self, txt, i, patern) :
-        """Process multiline instruction.
-        Return a dic with end declaration index and concat line"""
-        if patern == '\\' and txt[i+1][-1] == '\\' :
-            txt[i+1] = txt[i][:-1] + ' ' + txt[i+1]
-            return self.__multiLine(txt, i + 1, patern)
-        elif patern == '(' and ')' not in txt[i+1] :
-            txt[i+1] = txt[i][:-1] + ' ' + txt[i+1]
-            return self.__multiLine(txt, i + 1, patern)
-        elif patern == '\\' :
-            txt[i] = txt[i][:-1] + ' ' + txt[i+1]
-            return { 'idx': i + 1, 'line': txt[i] }
-        elif patern == '(' :
-            txt[i] = txt[i] + ' ' + txt[i+1]
-            return { 'idx': i + 1, 'line': re.sub('\(|\)| {2}', '', txt[i]) }
+    def __multiLine(self, data, res, count, itir) :
+        open_parenth = count + data[0].count('(')
+        clos_parenth = data[0].count(')')
+        if data[0] == '' :
+            return itir, [re.sub(' +', ' ', res)] + itir * ['']
+        if data[0][-1] == '\\' :
+            return self.__multiLine(data[1:], res + data[0][:-1], open_parenth - clos_parenth, itir + 1)
+        elif open_parenth - clos_parenth == 0 :
+            return itir, [re.sub(' +', ' ', res + data[0])] + itir * ['']
         else :
-            PC.LOG("UNK: " + txt[i])
+            return self.__multiLine(data[1:], res + data[0] + " ", open_parenth - clos_parenth, itir + 1)
 
-    def __setLineEndings(self, full_text):
-        """ Set line endings (unix or windows)
+    def __setIndent(self) :
+        if self.LINE_END == '\n' :
+            res = re.findall('\n[^\n#:]*: *\n( *)', self.ICODE)
+        elif self.LINE_END == '\c\r' :
+            res = re.findall('\c\r[^\c\r#:]*: *\c\r( *)', self.ICODE)
 
-            Must be one of `Unix` or `Windows`
-        """
-        find_le = re.compile('(\n|\c\r)')
-        le_found = find_le.match(full_text)
-        if le_found is None:
-            return
-        if '\n' in le_found.group(0):
-            self.__line_end = self.__sublime_line_endings['Unix']
-        else:
-            self.__line_end = self.__sublime_line_endings['Windows']
-
-    def __setIndent(self):
-        return 4
-        """ Determine indentation one character at a time
-            Sets self.__indent, a dict with keys <str>type, <int>value
-            Alternative to __setIndentRegex
-        """
-        for line in self.__text_lines:
-            if line[0] is '\t':
-                self.__indent['type'] = 'tabs'
-                break
-            if line[0] is ' ':
-                i = 1
-                while line[i] is ' ':
-                    i += 1
-                    self.__indent['value'] = i
-            break
-
-    def __setIndentRegex(self):
-        """ Determine indentation using a regex
-            Sets self.__indent, a dict with keys <str>type, <int>value
-            Alternative to __setIndent
-        """
-        for line in self.__text_lines:
-            ##indentRegex = '(?<=:' + le + ')^\s+'
-            find_space = re.compile('^\s+')
-            space_found = find_space.match(line)
-            if space_found is None:
-                continue
-            else:
-                if '\t' in space_found.group(0):
-                    self.__indent['type'] = 'tabs'
-                else:
-                    self.__indent['value'] = len(space_found.group(0))
-                break
-
+        for i in (sorted(res)) :
+            if i != '' : return len(i)
+        return 0
 
 
     ### PUBLIC METHOD
+
+    def process(self, fname, fpath) :
+        """Adds missing attributes used in a Python file"""
+        super().process(fname, fpath)
+        self.IDENT = self.__setIndent()      # indentation size
+        self.CCODE = self.__preProcess(self.ICODE, self.IDENT) # clean code results of preprocess
+        self.SCODE = self.scanCode(self.CCODE) # scan file content and returns code structure
+
 
     # under work...
     def scanCode(self, ccode) :
@@ -143,6 +101,7 @@ class PythonFile(File) :
         i = 0
 
         while i < len(ccode) :
+
             l = CodeLine(i+1, ccode[i], cont())
             i += 1
 
@@ -211,25 +170,25 @@ class PythonFile(File) :
                 x.updateEline()
         return res
 
-    def process(self, file_contents):
-        """ Receive full text, raw, from UI
+    # def process(self, file_contents):
+    #     """ Receive full text, raw, from UI
 
-            Diffs current state of file with incoming state
-            Triggers relevant actions on change
-            Obviously the current state of this function is utterly broken
-            (doesn’t handle line number changes)
-        """
-        if len(self.__text_lines) is 0:
-            # No text? -> Initial population
-            self.__setLineEndings(file_contents)
-            self.__text_lines = file_contents.split(self.__line_end)
-            self.__setIndent()
+    #         Diffs current state of file with incoming state
+    #         Triggers relevant actions on change
+    #         Obviously the current state of this function is utterly broken
+    #         (doesn’t handle line number changes)
+    #     """
+    #     if len(self.__text_lines) is 0:
+    #         # No text? -> Initial population
+    #         self.__setLineEndings(file_contents)
+    #         self.__text_lines = file_contents.split(self.__line_end)
+    #         self.__setIndent()
 
-        new_state = file_contents.split(self.__line_end)
-        for idx in range(len(new_state)):
-            if new_state[idx] != self.__text_lines[idx]:
-                print(new_state[idx])
-                pass # ... on to model
+    #     new_state = file_contents.split(self.__line_end)
+    #     for idx in range(len(new_state)):
+    #         if new_state[idx] != self.__text_lines[idx]:
+    #             print(new_state[idx])
+    #             pass # ... on to model
 
     def getSymbolTree(self, start='', end=''):
         """ Return symbol tree """

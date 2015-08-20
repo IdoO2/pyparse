@@ -10,8 +10,8 @@ This file implements 2 general class usable for every languages:
 
 from .db_toolkit import DBC
 from .conf import *
-from pprint import pprint
-
+# from pprint import pprint
+import re
 
 class Symbol(object) :
 
@@ -95,13 +95,23 @@ class File(object) :
 
     ### CONSTRUCTOR
 
-    def __init__(self, fname, fpath) :
+    def __init__(self) :
+        """Basic constructor: initialized attributes and File registered"""
+        self.LINE_END = ''
+        self.DBC = DBC()
+        self.FNAME = ''  # file name
+        self.FPATH = ''  # file path
+        self.ICODE = ''   # initiale file code
+        self.SCODE = []     # structure of a file (obtain after the scan)
+        self.ID = 0         # file ID
+
+    def process(self, fname, fpath) :
         """Basic constructor: initialized attributes and File registered"""
         fd = open(fpath + fname, 'r')
         code = fd.read()
         fd.close()
 
-        self.DBC = DBC()
+        self.LINE_END = self.__setLineEndings(code)
         self.FNAME = fname  # file name
         self.FPATH = fpath  # file path
         self.ICODE = code   # initiale file code
@@ -112,6 +122,15 @@ class File(object) :
         self.ID = self.__getID()
 
     ### PRIVATE METHODS
+
+    def __setLineEndings(self, full_text):
+        """ Set line endings (unix or windows)
+
+            Must be one of `Unix` or `Windows`
+        """
+        res = re.findall('(\n|\c\r)', full_text)
+        if not res : return
+        return res[0]
 
     def __register(self) :
         """Registers Python file in database"""
