@@ -18,6 +18,6 @@ LOG = lambda msg: sys.stderr.write(msg + "\n") # print log on stderr
 DBG = pdb.set_trace                            # facility for calling the debugger
 
 ### CONSTANTES
-TEST_DIRECTORY = '../test/'         # where some test file are store
-DB_SYMBOL = 'parser/db/db-symbol'   # where database is store -- do not use in prod !
-DB_STRUCT = 'parser/db/struct.sql'  # where the data structure sql is stored
+TEST_DIRECTORY = 'test/'         # where some test file are store
+DB_SYMBOL = 'src/parser/db/db-symbol'   # where database is store -- do not use in prod !
+DB_STRUCT = 'src/parser/db/struct.sql'  # where the data structure sql is stored

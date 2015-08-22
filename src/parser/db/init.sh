@@ -3,13 +3,16 @@
 # This db is mostly use for development and debugging
 # In production it's strongly recommanded to use an in memory db.
 
-db_file="db-symbol" # database default name
+WORKING_DIR='./'
+DB_DIR=$WORKING_DIR'/src/parser/db'
+STRUCT=$DB_DIR'/struct.sql'
+DB_FILE=$DB_DIR'/db-symbol' # database default name
 
-if [ -f $db_file ]
+if [ -f $DB_FILE ]
 then
-  echo "delete previous $db_file"
-  rm $db_file
+  echo "delete previous $DB_FILE"
+  rm $DB_FILE
 fi
 
-sqlite3 -echo $db_file < struct.sql # build a new db using struct.sql
+sqlite3 -echo $DB_FILE < $STRUCT # build a new db using struct.sql
 

@@ -123,7 +123,11 @@ class DBC():
         res = []
         name = []
 
-        for x in self.__getSymbols(values) :
+        symbols = self.__getSymbols(values)
+        if not symbols:
+            return res
+
+        for x in symbols:
             x = (self.__getGlobalSymbol([str(x[0]), values[2]]))
             if x[7] not in name :
                 res.append(x)
