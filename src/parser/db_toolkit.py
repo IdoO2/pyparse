@@ -144,7 +144,67 @@ class DBC():
             if x and x[8] not in name :
                 name.append(x[8])
                 res.append(x)
+        pprint(res)
         return res
+
+    def getFileSymbols(self, file_id):
+        """ Get all symbols from database for given file
+
+            Returns
+                start line `line`
+                type name `type`
+                string repr `name`
+        """
+        file_id = file_id if file_id else 1
+
+        select = ' '.join([
+            'SELECT',
+                's.id_symbol as id,',
+                's.ini_line as line,',
+                't.type as type,',
+                'CASE',
+                    # import
+                    'WHEN s.id_type = 10 THEN',
+                        'i.element',
+                    # variable
+                    'WHEN s.id_type = 11 THEN',
+                        'v.name',
+                    # function
+                    'WHEN s.id_type in (12, 13) THEN',
+                        'f.name',
+                    # class
+                    'WHEN s.id_type = 14 THEN',
+                        'c.name',
+                    # class  method
+                    'WHEN s.id_type in (20, 21, 22, 23, 24, 25, 30) THEN',
+                        'm.name',
+                    # class attribute
+                    'WHEN s.id_type = 30 THEN',
+                        'a.name',
+                    "ELSE '-'",
+                'END as name,',
+                'CASE',
+                    # class  method
+                    'WHEN s.id_type in (20, 21, 22, 23, 24, 25, 30) THEN',
+                        'm.id_class',
+                    # class attribute
+                    'WHEN s.id_type = 30 THEN',
+                        'a.id_class',
+                    'ELSE NULL',
+                'END as parent',
+            'FROM symbol s',
+            'LEFT OUTER JOIN symbol_type t on s.id_type = t.id_type',
+            'LEFT OUTER JOIN import i on s.id_symbol = i.id_symbol',
+            'LEFT OUTER JOIN variable v on s.id_symbol = v.id_symbol',
+            'LEFT OUTER JOIN function f on s.id_symbol = f.id_symbol',
+            'LEFT OUTER JOIN class c on s.id_symbol = c.id_symbol',
+            'LEFT OUTER JOIN method m on s.id_symbol = m.id_symbol',
+            'LEFT OUTER JOIN class_attr a on s.id_symbol = a.id_symbol',
+            'WHERE s.id_file =',
+            str(file_id),
+            ';'
+        ])
+        return self.__select(select)
 
     def close(self):
         """Close database connection"""
