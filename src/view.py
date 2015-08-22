@@ -111,7 +111,6 @@ class PyOutline(QMainWindow):
         """
         content = QVBoxLayout()
         content.addWidget(self.__tree)
-        self.setLayout(content)
         self.setGeometry(300, 300, 300, 150)
         self.setCentralWidget(self.__tree)
         self.setWindowTitle()
