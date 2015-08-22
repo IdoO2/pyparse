@@ -76,7 +76,6 @@ from qmodel import Tree
 from parser.python_file import PythonFile
 from parser.db_toolkit import DBC
 from exporter import Xmi
-from threading import Thread
 
 class PyOutline(QMainWindow):
     """ Handles UI: creates window, layout, adds a tree """
