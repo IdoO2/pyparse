@@ -70,7 +70,7 @@ rdic['variable_scope'] = '(extern|static) (.+)' #détermine si il y a un scope
 
 # ============ CLASSE ============ #
 
-class Test : pass
+class Test1 : pass
 
 
 class Test(str) :

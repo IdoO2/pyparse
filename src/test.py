@@ -2,27 +2,30 @@
 #!-*- coding: utf8 -*-
 # Author: Cyril RICHARD
 
+from parser.db_toolkit import DBC
+from os import listdir
 from parser.python_code_line import CodeLine
 from parser.conf import TEST_DIRECTORY
 from parser.python_file import PythonFile
-from parser.db_toolkit import DBC
 
 if __name__ == '__main__':
-    # for f in ['simple_oo.py', 'very_simple.py', 'view.py'] :
-    for f in ['simple_oo.py'] :
+    database = DBC()
+    database.reset() # reset database by deleting all symbol
+    for f in listdir(TEST_DIRECTORY) :
         print (f)
         test = PythonFile()
         test.process(f, TEST_DIRECTORY)
+        # print ('\n'.join(test.CCODE))
         for l in test.SCODE :
             if type(l) in [CodeLine] :
+                # print (l.show())
                 continue
 
             # print (l.show())
-            # l.show()
         # #     # print(l.stype)
         print()
-        # res = test.getSymbolTree()
-        # print (res)
-        #for x in res : print(x)
+        res = test.getSymbolTree()
+        print()
+        print (res)
         print()
 

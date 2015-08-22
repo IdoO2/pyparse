@@ -12,7 +12,7 @@
 # 5.     def change():
 # 6.       self.randval = 3
 
-data = [['Import', ['Tkinter [2]', 'Button', 'Frame', 'Label', 'Pack'], ['pdb [3]', 'set_trace']], ['Variable', 'a [38]'], ['Fonction', 'main1 [5]', 'main2 [7]', 'test [33]'], ['Classes', ['ClickCounter [11]', ['Attribut', 'count + [18]', 'label[]  [19]', 'label  [22]', 'button  [24]', 'count  [31]'], ['Constructeur', '__init__ [27]'], ['Methode Publique', 'main3 [13]', 'main4 [14]', 'click [17]', 'createWidgets [21]']]]]
+# data = [['Import', ['Tkinter [2]', 'Button', 'Frame', 'Label', 'Pack'], ['pdb [3]', 'set_trace']], ['Variable', 'a [38]'], ['Fonction', 'main1 [5]', 'main2 [7]', 'test [33]'], ['Classes', ['ClickCounter [11]', ['Attribut', 'count + [18]', 'label[]  [19]', 'label  [22]', 'button  [24]', 'count  [31]'], ['Constructeur', '__init__ [27]'], ['Methode Publique', 'main3 [13]', 'main4 [14]', 'click [17]', 'createWidgets [21]']]]]
 
 
 # Example mapping found in `parser`
@@ -36,6 +36,25 @@ data = [['Import', ['Tkinter [2]', 'Button', 'Frame', 'Label', 'Pack'], ['pdb [3
 # - lookup mapping for children of 3
 # - recurse on line 5
 
+data = [
+  ['Import',
+    ['sqlite3 [10]', ''],
+    ['.conf [11]', '*']
+  ],
+  ['Classes',
+    ['DBC [13]',
+      ['Constructeur', '__init__ [17]'],
+      ['Methode Publique', 'addSymbol [73]', 'addFile [80]', 'getFileID [87]', 'getSymbolID [95]', 'updateEndLine [103]', 'updateSymbol [111]', 'getGlobalSymbols [121]', 'getClassSymbols [130]', 'close [139]'],
+      ['Methode Privé', '__save [26]', '__select [37]', '__getSymbols [47]', '__getGlobalSymbol [54]', '__getClassSymbol [61]']],
+     ['DBCZ [143]',
+      ['Constructeur', '__init__ [147]']]
+   ]
+]
+
+data = [['Import', ['re,sys [5]', ''], ['type_code [6]', '*'], ['time [7]', 'timezone'], ['types [8]', 'NoneType', 'TypeType']], ['Variable', 'test1 [10]', 'test2 [13]', 'a [17]', 'b [22]', 'c [24]', 'M [28]', 'rdic [51]', 'msg [249]', 'fd [253]'], ['Fonction', 'cleanLine [35]', 'execReg [42]', 'onliner [46]', 'onliner2 [47]'], ['Classes', ['Test1 [73]'], ['Test [76]', ['Constructeur', '__init__ [77]'], ['Methode Publique', 'test [79]']], ['CCode [81]', ['Attribut', 'varType [84]', 'include [88]', 'define [89]', 'typedef [90]', 'fonction [91]', 'vars [92]', 'txt [93]', 'symbol [94]'], ['Constructeur', '__init__ [83]'], ['Methode Publique', 'showSymbol [241]'], ['Methode Privé', '__preProcess [105]', '__addInclude [147]', '__addDefine [152]', '__addTypedef [165]', '__addFunction [174]', '__addVariable [183]', '__isTyped [206]', '__getSymbol [211]', '__setUse [227]']]]]
+
+
+
 
 # Helpers
 import inspect
@@ -52,12 +71,12 @@ from PyQt5.QtWidgets import (QTreeView, QApplication,
 from PyQt5.QtCore import QDir, Qt, QStringListModel
 from PyQt5.QtGui import QIcon
 
-
 # Application
 from qmodel import Tree
 from parser.python_file import PythonFile
 from parser.db_toolkit import DBC
 from exporter import Xmi
+from threading import Thread
 
 class PyOutline(QMainWindow):
     """ Handles UI: creates window, layout, adds a tree """
@@ -71,17 +90,16 @@ class PyOutline(QMainWindow):
         QMainWindow.__init__(self)
 
         # Parser instance
-        self.__data = DBC()
+        self.__data = PythonFile()
 
         # Model
-        self.__model = Tree(data, '')
+        self.__model = Tree([], '')
 
         # View
         self.__tree = QTreeView()
         self.__tree.setModel(self.__model)
 
         # Window layout with tree
-
         self.__buildWindow()
 
     def __buildWindow(self):
@@ -98,7 +116,10 @@ class PyOutline(QMainWindow):
         self.setGeometry(300, 300, 300, 150)
         self.setCentralWidget(self.__tree)
         self.setWindowTitle()
-        #self.menuBar()
+        # self.__buildMenu()
+        self.__model.setBranches([])
+        self.__model.setBranches(data)
+        self.__model.setBranches([])
 
     def __buildMenu(self):
         """ Add menu bar elements
@@ -140,12 +161,13 @@ class PyOutline(QMainWindow):
             return
 
         filename = re.findall(r'[^/\\]+$', filepath)[0]
+        filepath = filepath.replace(filename, '')
 
-        self.__model.setFileName(filename)
         self.setWindowTitle(filename)
-        print(self.__model)
-        # pfile = PythonFile(filename, filepath)
-        # pfile.process()
+        self.__data = PythonFile()
+        self.__data.process(filename, filepath)
+        self.__model.setFileName(filename)
+        self.__model = Tree(self.__data.getSymbolTree(), '')
 
     def setWindowTitle(self, *filename):
         """ Set a normalised window title
