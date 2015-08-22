@@ -58,12 +58,12 @@ CREATE TABLE class (              -- describes class specific attributes
   FOREIGN KEY (id_symbol) REFERENCES symbol(id_symbol) ON DELETE CASCADE
 );
 
-CREATE TABLE docstring (          -- describes docstring specific attributes
-  id_symbol INTEGER PRIMARY KEY,  -- symbol unique id
-  context TEXT,                   -- symbol in which the docstring is defined
-  -- import docstring bound with symbol existence:
-  FOREIGN KEY (id_symbol) REFERENCES symbol(id_symbol) ON DELETE CASCADE
-);
+-- CREATE TABLE docstring (          -- describes docstring specific attributes
+--   id_symbol INTEGER PRIMARY KEY,  -- symbol unique id
+--   context TEXT,                   -- symbol in which the docstring is defined
+--   -- import docstring bound with symbol existence:
+--   FOREIGN KEY (id_symbol) REFERENCES symbol(id_symbol) ON DELETE CASCADE
+-- );
 
 CREATE TABLE method (             -- describes method specific attributes
   id_symbol INTEGER PRIMARY KEY,  -- symbol unique id
@@ -145,12 +145,12 @@ BEGIN
   INSERT INTO tmp_index (id_symbol) VALUES (new.id_symbol);
 END;
 
-CREATE TRIGGER trg_insert_symbol_docstring AFTER INSERT ON symbol
-WHEN new.id_type = 40 OR new.id_type = 41
-BEGIN
-  INSERT INTO docstring (id_symbol) VALUES (new.id_symbol);
-  INSERT INTO tmp_index (id_symbol) VALUES (new.id_symbol);
-END;
+-- CREATE TRIGGER trg_insert_symbol_docstring AFTER INSERT ON symbol
+-- WHEN new.id_type = 40 OR new.id_type = 41
+-- BEGIN
+--   INSERT INTO docstring (id_symbol) VALUES (new.id_symbol);
+--   INSERT INTO tmp_index (id_symbol) VALUES (new.id_symbol);
+-- END;
 
 CREATE TRIGGER trg_insert_symbol_class_attr AFTER INSERT ON symbol
 WHEN new.id_type = 30

@@ -15,6 +15,7 @@ from PyQt5.QtGui import QIcon
 
 def main1() : return 0
 
+
 def main2() :
 	print ()
 	print ()
@@ -40,9 +41,3 @@ class ClickCounter(Frame):
         Pack.config(self)
         self.createWidgets()
         self.count = 0
-
-def test() :
-	return
-
-if __name__=="__main__":
-    ClickCounter().mainloop()
