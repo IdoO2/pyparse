@@ -37,7 +37,7 @@ class Tree(QStandardItemModel):
 
     def __addBranches(self, branches, parent=None):
         """
-        Use to fully built tree to populate tree
+        Use to fully build tre
         Must be done on a clean tree
         """
         parent = parent if parent else self.invisibleRootItem()

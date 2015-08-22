@@ -39,7 +39,7 @@ class DBC():
         try:
             self.DB_CURS.execute(sql)
         except :
-            LOG('Issue while inserting data in db.')
+            LOG('Issue while retrieving data from db.')
             LOG(sql)
             return False
         return self.DB_CURS.fetchall()

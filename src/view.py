@@ -154,19 +154,18 @@ class PyOutline(QMainWindow):
            Provide file chooser
            Given file, set file name for view and text for parser
         """
-        filepath, _type = QFileDialog.getOpenFileName(self, 'Open file for inspection', os.getenv('HOME'))
+        fullpath, type_ = QFileDialog.getOpenFileName(self, 'Open file for inspection', os.getenv('HOME'))
 
-        if not os.path.isfile(filepath) or not os.access(filepath, os.R_OK):
+        if not os.path.isfile(fullpath) or not os.access(fullpath, os.R_OK):
             return
 
-        filename = re.findall(r'[^/\\]+$', filepath)[0]
-        filepath = filepath.replace(filename, '')
+        filepath, filename = os.path.split(fullpath)
 
         self.setWindowTitle(filename)
         self.__data = PythonFile()
-        self.__data.process(filename, filepath)
-        self.__model.setFileName(filename)
-        self.__model = Tree(self.__data.getSymbolTree(), '')
+        self.__data.process(filename, filepath + '/')
+        self.__model.setFileName(fullpath)
+        self.__model.setBranches(self.__data.getSymbolTree())
 
     def setWindowTitle(self, *filename):
         """ Set a normalised window title
