@@ -16,7 +16,7 @@ from pprint import pprint
 
 class CodeLine(object) :
     """Class that represent a line of code and calculate it's type"""
-    indent = 1 # defaut indentation size
+    indent = 4 # defaut indentation size
 
     def __init__(self, nline, code, context) :
         """Initializes CodeLine attributes"""
@@ -77,7 +77,8 @@ class CodeLine(object) :
         if not 'self' in string and \
          re.findall(RDIC['se_var'], string) and self.context :
             return SYM_PRI_VAR
-        if 'self.' in string and not re.findall(' *self.[^ (]*\(', string) :
+        if 'self.' in string and re.findall('self.[^\(\) ]+ *=', string) \
+         and self.context:
             return SYM_ATTR_CLASS
 #### END OTHER
         return SYM_CODE # basic line of code
@@ -100,13 +101,6 @@ class CodeLine(object) :
 
         return string
 
-    # Not done yet !
-    # def __getInstruction(self) :
-    #     """"""
-    #     inst = []
-    #     print (self.code)
-    #     return inst
-
     def __getLevel(self, string) :
         """Calculates level according whitespace number before first caracter.
         This number is divided by the tab size."""
@@ -124,7 +118,7 @@ class CodeLine(object) :
     # def __str__(self) :
         """return string representation"""
         idclass = idclass if idclass else -1
-        return ('{0:4d}:{1:2d}:{2:2d}| {3}'.format(self.nline, self.context, idclass, self.icode))
+        return ('{0:4d}:{1:2d}:{2:2d}:{3:2d}| {4}'.format(self.nline, self.context, idclass, self.level, self.icode))
 
     def getVariable(self) :
         """Exposes crucial variable. Used when the code is scanned."""

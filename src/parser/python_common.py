@@ -61,8 +61,6 @@ CDIC = {
   SYM_PUB_MET_MUL: Method,
   SYM_PRI_MET_MUL: Method,
   SYM_CON_MET_MUL: Method,
-  SYM_DOCS_ONE: DocString,
-  SYM_DOCS_MUL: DocString
 }
 
 ### CLASS LIST -- facility for class type testing
@@ -73,7 +71,6 @@ CLIST = [
   Class,
   ClassAttribute,
   Method,
-  DocString
 ]
 
 ### CONSTANT LIST -- facility for constant testing
