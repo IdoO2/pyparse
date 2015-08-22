@@ -65,6 +65,7 @@ class Tree(QStandardItemModel):
         use with care
         """
         # :delete existing data
+        self.clear()
         self.__addBranches(branches)
 
     def addRow(self, index, branch, parent=None):
