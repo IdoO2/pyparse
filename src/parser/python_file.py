@@ -183,52 +183,50 @@ class PythonFile(File) :
                 x.updateEline()
         return res
 
+    def __buildTree(self, symbols, tree):
+        """ Create a tree structure from the flat db data
+
+            TODO: handle more than two levels (recurse)
+        """
+        tmp_tree = {}
+        real_tree = []
+        # symbol entries are: 0-id, 1-first line number, 2-type, 3-name, 4-parent
+        for s in symbols:
+            if s[4] is None:
+                tmp_tree[s[0]] = [s, {}]
+            elif s[4] in tmp_tree:
+                tmp_tree[s[4]][1][s[0]] = [s, {}]
+
+        return self.__translateTree(tmp_tree)
+
+    def __translateTree(self, tmp_tree):
+        """ Convert transitional tree structure to public standards
+
+            TODO: handle more than two levels (recurse)
+        """
+        tree = []
+        for l in tmp_tree:
+            if not tmp_tree[l][1]:
+                tree.append(
+                    (tmp_tree[l][0][3], tmp_tree[l][0][2])
+                )
+            else:
+                level = [(tmp_tree[l][0][3], tmp_tree[l][0][2])]
+                for k in tmp_tree[l][1]:
+                    level.append(
+                        (tmp_tree[l][1][k][0][3], tmp_tree[l][1][k][0][2])
+                    )
+                tree.append(level)
+
+        return tree
 
     def getSymbolTree(self, start='', end=''): #start and end not use yet
         """ Return symbol tree for GUI"""
-        req_global = [ #label, table name, code for querying symbol
-            ['Import', 'import', "10"],
-            ['Variable', 'variable', "11"],
-            ['Fonction', 'function', "12,13"],
-            ['Classes', 'class', "14"],
-        ]
-        req_class = [ #label, table name, code for querying class symbol
-            ['Attribut', 'class_attr', "30"],
-            ['Constructeur', 'method', '22,25'],
-            ['Methode Publique', 'method', '20,23'],
-            ['Methode Privé', 'method', '21,24']
-        ]
-        res = [] # result array
 
-        for lib, tab, l in req_global :
-            tmp_arr = [] #temporary array used for creating branch
-            tmp_ins = None #use to store symbole instance
-            if tab not in ['class'] : # if querying not a class
-                arr = self.DBC.getGlobalSymbols([l, self.ID, tab])
-                if not arr : continue
-                for x in arr :
-                    tmp_ins = CDIC[int(x[2])]() # initialize current object
-                    tmp_ins.load(x) # load current object with data
-                    tmp_arr.append(tmp_ins.symbRepr()) # append symbol representation in arr
-                res.append([lib] + tmp_arr) # append type of symbol and linked array
-                continue
-            elif tab in ['class'] : # if querying a class
-                arr = self.DBC.getGlobalSymbols([l, self.ID, tab]) #array storing class
-                if not arr : continue
-                for x in arr : #for each class
-                    class_arr = [] #will store symbol define in a given class
-                    id_class = x[0] # get the class id
-                    tmp_ins_class = CDIC[int(x[2])]() #instanciation of a class
-                    tmp_ins_class.load(x) #load class attribute with an array of data
-                    for lib2, tab2, l2 in req_class : #for each class symbol (method, attribute etc...)
-                        tmp_arr2 = [] # another temporary arr
-                        for z in self.DBC.getClassSymbols([l2, self.ID, tab2, id_class]) :
-                            tmp_ins = CDIC[int(z[2])]()
-                            tmp_ins.load(z)
-                            tmp_arr2.append(tmp_ins.symbRepr())
-                        if not tmp_arr2 : continue
-                        class_arr.append([lib2] + tmp_arr2) #adding a category of symbol to class array
-                    tmp_arr += [[tmp_ins_class.symbRepr()] + class_arr] #adding class array to tmp_arr
-                res.append([lib] + tmp_arr) #adding all classes to result
-            if not arr : continue
-        return res
+        # Get all symbols for file
+        symbols = self.DBC.getFileSymbols(self.ID)
+
+        # Populate data structure with db symbols
+        symbol_tree = self.__buildTree(symbols, tree)
+
+        return symbol_tree if symbol_tree else []
