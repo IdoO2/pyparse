@@ -174,7 +174,6 @@ class Class(Symbol) :
         self.name = ''
         self.lega = []
 
-
     def register(self, id_file, code) :
         """Register a Class symbol in database"""
         super().register(id_file, code)
