@@ -118,34 +118,34 @@ class DBC():
         sql += "AND ini_line = '" + str(values[3]) + "');"
         return self.__save(sql)
 
-    def getGlobalSymbols(self, values) :
-        """Return all non-Class symbols"""
-        res = []
-        name = []
+    # def getGlobalSymbols(self, values) :
+    #     """Return all non-Class symbols"""
+    #     res = []
+    #     name = []
 
-        symbols = self.__getSymbols(values)
-        if not symbols:
-            return res
+    #     symbols = self.__getSymbols(values)
+    #     if not symbols:
+    #         return res
 
-        for x in symbols:
-            x = (self.__getGlobalSymbol([str(x[0]), values[2]]))
-            if x[7] not in name :
-                res.append(x)
-                name.append(x[7])
-        return res
+    #     for x in symbols:
+    #         x = (self.__getGlobalSymbol([str(x[0]), values[2]]))
+    #         if x[7] not in name :
+    #             res.append(x)
+    #             name.append(x[7])
+    #     return res
 
-    def getClassSymbols(self, values) :
-        """Return all Class symbols"""
-        res = []
-        name = []
+    # def getClassSymbols(self, values) :
+    #     """Return all Class symbols"""
+    #     res = []
+    #     name = []
 
-        for x in self.__getSymbols(values) :
-            x = (self.__getClassSymbol([str(x[0]), values[2], values[3]]))
-            if x and x[8] not in name :
-                name.append(x[8])
-                res.append(x)
-        pprint(res)
-        return res
+    #     for x in self.__getSymbols(values) :
+    #         x = (self.__getClassSymbol([str(x[0]), values[2], values[3]]))
+    #         if x and x[8] not in name :
+    #             name.append(x[8])
+    #             res.append(x)
+    #     pprint(res)
+    #     return res
 
     def getFileSymbols(self, file_id):
         """ Get all symbols from database for given file
@@ -157,7 +157,7 @@ class DBC():
         """
         file_id = file_id if file_id else 1
 
-        select = ' '.join([
+        select = '\n'.join([
             'SELECT',
                 's.id_symbol as id,',
                 's.ini_line as line,',
@@ -165,7 +165,7 @@ class DBC():
                 'CASE',
                     # import
                     'WHEN s.id_type = 10 THEN',
-                        'i.element',
+                        'i.module',
                     # variable
                     'WHEN s.id_type = 11 THEN',
                         'v.name',
@@ -176,7 +176,7 @@ class DBC():
                     'WHEN s.id_type = 14 THEN',
                         'c.name',
                     # class  method
-                    'WHEN s.id_type in (20, 21, 22, 23, 24, 25, 30) THEN',
+                    'WHEN s.id_type in (20, 21, 22, 23, 24, 25) THEN',
                         'm.name',
                     # class attribute
                     'WHEN s.id_type = 30 THEN',
@@ -184,8 +184,23 @@ class DBC():
                     "ELSE '-'",
                 'END as name,',
                 'CASE',
+                    # import
+                    'WHEN s.id_type = 10 THEN',
+                        'i.element',
+                    # function
+                    'WHEN s.id_type in (12, 13) THEN',
+                        'f.args',
+                    # class
+                    'WHEN s.id_type = 14 THEN',
+                        'c.legacy',
                     # class  method
-                    'WHEN s.id_type in (20, 21, 22, 23, 24, 25, 30) THEN',
+                    'WHEN s.id_type in (20, 21, 22, 23, 24, 25) THEN',
+                        'm.args',
+                    "ELSE NULL",
+                'END as args,',
+                'CASE',
+                    # class  method
+                    'WHEN s.id_type in (20, 21, 22, 23, 24, 25) THEN',
                         'm.id_class',
                     # class attribute
                     'WHEN s.id_type = 30 THEN',
