@@ -183,39 +183,69 @@ class PythonFile(File) :
                 x.updateEline()
         return res
 
-    def __buildTree(self, symbols, tree):
+    def __buildTree(self, symbols):
         """ Create a tree structure from the flat db data
 
             TODO: handle more than two levels (recurse)
         """
         tmp_tree = {}
-        real_tree = []
-        # symbol entries are: 0-id, 1-first line number, 2-type, 3-name, 4-parent
-        for s in symbols:
-            if s[4] is None:
-                tmp_tree[s[0]] = [s, {}]
-            elif s[4] in tmp_tree:
-                tmp_tree[s[4]][1][s[0]] = [s, {}]
+        name = []
+        # symbol entries are: 0-id, 1-first line number, 2-type, 3-visibility, 4-name, 5-args, 6-parent
+        if not symbols : return {}
 
-        return self.__translateTree(tmp_tree)
+        for s in symbols:
+            if s[6] is None and str(s[4]) + str(s[6]) not in name :
+                tmp_tree[s[0]] = [s, {}]
+                name.append(str(s[4]) + str(s[6]))
+            elif s[6] in tmp_tree and str(s[4]) + str(s[6]) not in name :
+                tmp_tree[s[6]][1][s[0]] = [s, {}]
+                name.append(str(s[4]) + str(s[6]))
+
+        return tmp_tree
 
     def __translateTree(self, tmp_tree):
         """ Convert transitional tree structure to public standards
 
             TODO: handle more than two levels (recurse)
         """
+        getName = lambda x : x[4]
+        getType = lambda x : x[2]
+        getVisi = lambda x : x[3]
+        getSign = lambda x : x[5].split('|')
+
         tree = []
+        level = []
+
         for l in tmp_tree:
+            symbol = tmp_tree[l][0]
+
             if not tmp_tree[l][1]:
-                tree.append(
-                    (tmp_tree[l][0][3], tmp_tree[l][0][2])
-                )
-            else:
-                level = [(tmp_tree[l][0][3], tmp_tree[l][0][2])]
-                for k in tmp_tree[l][1]:
-                    level.append(
-                        (tmp_tree[l][1][k][0][3], tmp_tree[l][1][k][0][2])
+                if getType(symbol) in ['function', 'import'] :
+                    tree.append(
+                        (getName(symbol), {'type': getType(symbol), 'signature': getSign(symbol)})
                     )
+                else :
+                    tree.append(
+                        (getName(symbol), {'type': getType(symbol)})
+                    )
+            else:
+                level = [(getName(symbol), symbol[2])]
+                for k in tmp_tree[l][1]:
+                    sub_symbol = tmp_tree[l][1][k][0]
+
+                    if getType(sub_symbol) in ['method', 'constructor'] :
+                        level.append(
+                            (getName(sub_symbol), {
+                                'type': getType(sub_symbol),
+                                'visibility': getVisi(sub_symbol),
+                                'signature': getSign(sub_symbol)})
+                        )
+
+                    else :
+                        level.append(
+                            (getName(sub_symbol), {'type': getType(sub_symbol), 'visibility': getVisi(sub_symbol)})
+                        )
+
                 tree.append(level)
 
         return tree
@@ -226,7 +256,19 @@ class PythonFile(File) :
         # Get all symbols for file
         symbols = self.DBC.getFileSymbols(self.ID)
 
-        # Populate data structure with db symbols
-        symbol_tree = self.__buildTree(symbols, tree)
 
-        return symbol_tree if symbol_tree else []
+
+        # Populate data structure with db symbols
+        symbol_tree = self.__buildTree(symbols)
+
+        return self.__translateTree(symbol_tree) if symbol_tree else []
+        # return \
+# [
+#     [
+#       ('Master', {'type': 'class'}),
+#         ('This is a properly fake class', {'type': 'comment'}),
+#         ('__initialised', {'type': 'attribute', 'visibility': 'private'}),
+#         ('randval', {'type': 'function', 'visibility': 'public'}),
+#         [('__init__', {'type': 'function', 'signature': ['arg', '*args', '**kwargs'], 'visibility': 'private'}),
+#           ('change', {'type': 'function'})] ]
+# ]

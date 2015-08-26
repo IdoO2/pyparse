@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.4
 #!-*- coding: utf8 -*-
 # Author: Daniel PATERSON
 

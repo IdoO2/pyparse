@@ -4,24 +4,26 @@ PRAGMA foreign_keys = ON;
 
 -- TABLES
 
-CREATE TABLE file ( 			       -- registers analyzed files
-  id_file INTEGER PRIMARY KEY,	 -- file unique id
-  fname TEXT,					           -- file name
-  fpath TEXT					           -- file path
+CREATE TABLE file (              -- registers analyzed files
+  id_file INTEGER PRIMARY KEY,   -- file unique id
+  fname TEXT,                    -- file name
+  fpath TEXT                     -- file path
 );
 
-CREATE TABLE symbol_type (		   -- describes the type of each symbol
-  id_type INTEGER PRIMARY KEY,	 -- type unique id
-  type TEXT 					           -- type description
+CREATE TABLE symbol_type (       -- describes the type of each symbol
+  id_type INTEGER PRIMARY KEY,   -- type unique id
+  type TEXT,                     -- type description
+  global_type TEXT,              -- type description use in xmi export
+  visibility TEXT                -- symbol visibility
 );
 
 CREATE TABLE symbol (            -- describes common symbol attributes
   id_symbol INTEGER PRIMARY KEY, -- symbol unique id
-  id_file INTEGER,				       -- file id in which symbol is defined
-  id_type INTEGER,				       -- type id of the symbol
-  ini_line INTEGER,				       -- initialization line
-  end_line INTEGER,				       -- last line of symbol definition
-  use_line TEXT, 				         -- lines where symbol is used
+  id_file INTEGER,               -- file id in which symbol is defined
+  id_type INTEGER,               -- type id of the symbol
+  ini_line INTEGER,              -- initialization line
+  end_line INTEGER,              -- last line of symbol definition
+  use_line TEXT,                 -- lines where symbol is used
   -- symbol existence bound with file existence:
   FOREIGN KEY (id_file) REFERENCES file(id_file) ON DELETE CASCADE
 );
@@ -93,24 +95,23 @@ CREATE TABLE tmp_index (  -- temporary table used to register the current proces
 -- INSERT
 -- FILLS xxx_type table with constant value --
 
-INSERT INTO symbol_type VALUES(10, 'import');
-INSERT INTO symbol_type VALUES(11, 'global variable');
-INSERT INTO symbol_type VALUES(12, 'oneline function');
-INSERT INTO symbol_type VALUES(13, 'multiline function');
-INSERT INTO symbol_type VALUES(14, 'class declaration');
+INSERT INTO symbol_type VALUES(10, 'import', 'import', 'public');
+INSERT INTO symbol_type VALUES(11, 'global variable', 'variable', 'public');
+INSERT INTO symbol_type VALUES(12, 'oneline function', 'function', 'public');
+INSERT INTO symbol_type VALUES(13, 'multiline function', 'function', 'public');
+INSERT INTO symbol_type VALUES(14, 'class declaration', 'class', 'public');
 
-INSERT INTO symbol_type VALUES(20, 'oneline public method');
-INSERT INTO symbol_type VALUES(21, 'oneline private method');
-INSERT INTO symbol_type VALUES(22, 'oneline constructor method');
-INSERT INTO symbol_type VALUES(23, 'multiline public method');
-INSERT INTO symbol_type VALUES(24, 'multiline private method');
-INSERT INTO symbol_type VALUES(25, 'multiline constructor method');
+INSERT INTO symbol_type VALUES(20, 'oneline public method', 'method', 'public');
+INSERT INTO symbol_type VALUES(21, 'oneline private method', 'method', 'private');
+INSERT INTO symbol_type VALUES(22, 'oneline constructor method', 'constructor', 'public');
+INSERT INTO symbol_type VALUES(23, 'multiline public method', 'method', 'public');
+INSERT INTO symbol_type VALUES(24, 'multiline private method', 'method', 'private');
+INSERT INTO symbol_type VALUES(25, 'multiline constructor method', 'constructor', 'public');
 
-INSERT INTO symbol_type VALUES(30, 'class attribute');
+INSERT INTO symbol_type VALUES(30, 'class attribute', 'attribute', 'public');
 
-INSERT INTO symbol_type VALUES(40, 'oneline docstring');
-INSERT INTO symbol_type VALUES(41, 'multiline docstring');
-
+INSERT INTO symbol_type VALUES(40, 'oneline docstring', 'docstring', 'None');
+INSERT INTO symbol_type VALUES(41, 'multiline docstring', 'docstring', 'None');
 
 -- TRIGGER --
 -- Triggers are used for preserving the data integretity and automate

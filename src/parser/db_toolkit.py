@@ -118,35 +118,6 @@ class DBC():
         sql += "AND ini_line = '" + str(values[3]) + "');"
         return self.__save(sql)
 
-    # def getGlobalSymbols(self, values) :
-    #     """Return all non-Class symbols"""
-    #     res = []
-    #     name = []
-
-    #     symbols = self.__getSymbols(values)
-    #     if not symbols:
-    #         return res
-
-    #     for x in symbols:
-    #         x = (self.__getGlobalSymbol([str(x[0]), values[2]]))
-    #         if x[7] not in name :
-    #             res.append(x)
-    #             name.append(x[7])
-    #     return res
-
-    # def getClassSymbols(self, values) :
-    #     """Return all Class symbols"""
-    #     res = []
-    #     name = []
-
-    #     for x in self.__getSymbols(values) :
-    #         x = (self.__getClassSymbol([str(x[0]), values[2], values[3]]))
-    #         if x and x[8] not in name :
-    #             name.append(x[8])
-    #             res.append(x)
-    #     pprint(res)
-    #     return res
-
     def getFileSymbols(self, file_id):
         """ Get all symbols from database for given file
 
@@ -161,7 +132,8 @@ class DBC():
             'SELECT',
                 's.id_symbol as id,',
                 's.ini_line as line,',
-                't.type as type,',
+                't.global_type as type,',
+                't.visibility as visibility,',
                 'CASE',
                     # import
                     'WHEN s.id_type = 10 THEN',

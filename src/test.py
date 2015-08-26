@@ -27,7 +27,6 @@ if __name__ == '__main__':
         # #     # print(l.stype)
         print()
         res = test.getSymbolTree()
-        print()
-        # pprint (res)
+        pprint (res)
         print()
 
