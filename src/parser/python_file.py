@@ -19,6 +19,8 @@ class PythonFile(File) :
 
     """Specific code for handling a Python file"""
 
+    __tree = None
+
     ### CONSTRUCTOR
 
     def __init__(self) :
@@ -229,7 +231,7 @@ class PythonFile(File) :
                         (getName(symbol), {'type': getType(symbol)})
                     )
             else:
-                level = [(getName(symbol), symbol[2])]
+                level = [(getName(symbol), {'type': symbol[2]})]
                 for k in tmp_tree[l][1]:
                     sub_symbol = tmp_tree[l][1][k][0]
 
@@ -240,7 +242,6 @@ class PythonFile(File) :
                                 'visibility': getVisi(sub_symbol),
                                 'signature': getSign(sub_symbol)})
                         )
-
                     else :
                         level.append(
                             (getName(sub_symbol), {'type': getType(sub_symbol), 'visibility': getVisi(sub_symbol)})
@@ -250,25 +251,17 @@ class PythonFile(File) :
 
         return tree
 
-    def getSymbolTree(self, start='', end=''): #start and end not use yet
+    def getSymbolTree(self):
         """ Return symbol tree for GUI"""
+
+        if self.__tree:
+            return self.__tree
 
         # Get all symbols for file
         symbols = self.DBC.getFileSymbols(self.ID)
 
-
-
         # Populate data structure with db symbols
         symbol_tree = self.__buildTree(symbols)
+        self.__tree = self.__translateTree(symbol_tree)
 
-        return self.__translateTree(symbol_tree) if symbol_tree else []
-        # return \
-# [
-#     [
-#       ('Master', {'type': 'class'}),
-#         ('This is a properly fake class', {'type': 'comment'}),
-#         ('__initialised', {'type': 'attribute', 'visibility': 'private'}),
-#         ('randval', {'type': 'function', 'visibility': 'public'}),
-#         [('__init__', {'type': 'function', 'signature': ['arg', '*args', '**kwargs'], 'visibility': 'private'}),
-#           ('change', {'type': 'function'})] ]
-# ]
+        return self.__tree if self.__tree else []
