@@ -12,12 +12,13 @@ This file implements some constants providing facility for:
 
 import pdb
 import sys
+from os import getcwd, path
 
 ### SHORTCUT
 LOG = lambda msg: sys.stderr.write(msg + "\n") # print log on stderr
 DBG = pdb.set_trace                            # facility for calling the debugger
 
 ### CONSTANTES
-TEST_DIRECTORY = '../test/'         # where some test file are store
-DB_SYMBOL = 'parser/db/db-symbol'   # where database is store
-DB_STRUCT = 'parser/db/struct.sql'  # where the data structure sql is stored
+TEST_DIRECTORY = path.join(getcwd(), 'test')         # where some test file are store
+DB_SYMBOL = path.join(getcwd(), 'src/parser/db/db-symbol')   # where database is store
+DB_STRUCT = path.join(getcwd(), 'src/parser/db/struct.sql')  # where the data structure sql is stored

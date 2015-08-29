@@ -2,7 +2,7 @@
 
 if [ ! -f src/parser/db/db-symbol ]
 then
-    sh src/parser/db/init.sh
+    sh init.sh
 fi
 
 python src/view.py
