@@ -200,12 +200,12 @@ class PyOutline(QMainWindow):
         try:
             self.__xmi.setTree(self.__data.getSymbolTree())
             self.__xmi.write(filename)
-        except ValueError:
-            pass # inform: bad format for data
-        except RuntimeError:
-            pass # inform: but should not be here
-        except OSError:
-            pass # inform: problem writing file
+        except ValueError as em:
+            print('bad format for data: {}'.format(em))
+        except RuntimeError as em:
+            print('should not be here: {}'.format(em))
+        except OSError as em:
+            print('inform: problem writing file {}'.format(em))
 
 # Launch application
 app = QApplication(sys.argv)
