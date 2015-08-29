@@ -188,8 +188,7 @@ class PyOutline(QMainWindow):
 
     def createXmi(self):
         """ Create XMI file """
-        #filename, type = QFileDialog.getOpenFileName(self, 'Open file for inspection', os.getenv('HOME'))
-        root = self.__basepath != '' if self.__basepath != '' else os.getenv('HOME')
+        root = self.__basepath if self.__basepath != '' else os.getenv('HOME')
         filename, type = QFileDialog.getSaveFileName(self, 'Open file for inspection', root)
 
         path, name = os.path.split(filename)
