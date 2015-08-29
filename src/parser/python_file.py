@@ -35,7 +35,7 @@ class PythonFile(File) :
             . tabulations are changed in whitespaces
             . multiline are changed in one line"""
         txt = self.__comment(txt)
-        self.IDENT = self.__setIndent(txt + '\n') # indentation size
+        self.IDENT = self.__setIndent(txt) # indentation size
         arr_txt = txt.replace('\t', ' ' * self.IDENT).split(self.LINE_END)
         i = 0
 

@@ -61,7 +61,6 @@ import inspect
 from pprint import pprint
 import pdb
 
-
 # Libraries
 import re
 import sys
@@ -77,54 +76,6 @@ from qmodel import Tree
 from parser.python_file import PythonFile
 from parser.db_toolkit import DBC
 from exporter import Xmi
-import network_common as NC
-from threading import Thread
-
-class SublimeServer(object) :
-
-    def __init__ (self, UI) :
-        self.UI = UI
-
-    def __process(self, data) :
-        print (data)
-        filename = data[0]
-        filepath = data[1]
-        fullpath = filepath + '/' + filename
-
-        self.UI.setWindowTitle(filename)
-        self.UI.data = PythonFile()
-        self.UI.data.process(filename, filepath + '/')
-        self.UI.model.setFileName(fullpath)
-        self.UI.model.setBranches(self.UI.data.getSymbolTree())
-        return "PROCESS OK"
-
-    def __update(self, data) :
-        filename = ''
-        filepath = ''
-        fullpath = filepath + '/' + filename
-
-        self.UI.data = PythonFile()
-        self.UI.data.process(filename, filepath + '/')
-        self.UI.model.setFileName(fullpath)
-        self.UI.model.setBranches(self.UI.data.getSymbolTree())
-        return "UPDT OK"
-
-    def serverProcess(self, idata, add_data) :
-    # on récupère la donnée et on dirige les requêtes vers les bonnes fonctions
-        idata.replace('\n', '')
-        op = idata[0:4]
-        qry = idata[4:]
-
-        if op == "PROC" :
-            return self.__process(qry.split())
-        elif op == "UPDT" :
-            return self.__update(qry.split())
-        else :
-            return "ERROR " + idata
-
-    def run(self) :
-        NC.initTServer(1255, process=self.serverProcess)
-
 
 class PyOutline(QMainWindow):
     """ Handles UI: creates window, layout, adds a tree """
@@ -145,7 +96,7 @@ class PyOutline(QMainWindow):
 
         # View
         self.__tree = QTreeView()
-        self.__tree.setModel(self.model)
+        self.__tree.setModel(self.__model)
 
         # Window layout with tree
         self.__buildWindow()
@@ -163,10 +114,10 @@ class PyOutline(QMainWindow):
         self.setGeometry(300, 300, 300, 150)
         self.setCentralWidget(self.__tree)
         self.setWindowTitle()
-        # self.__buildMenu()
-        #self.model.setBranches([])
-        self.model.setBranches(self.data.getSymbolTree())
-        #self.model.setBranches([])
+        self.__buildMenu()
+        #self.__model.setBranches([])
+        self.__model.setBranches(self.__data.getSymbolTree())
+        #self.__model.setBranches([])
 
     def __buildMenu(self):
         """ Add menu bar elements
@@ -210,10 +161,10 @@ class PyOutline(QMainWindow):
         filepath, filename = os.path.split(fullpath)
 
         self.setWindowTitle(filename)
-        self.data = PythonFile()
-        self.data.process(filename, filepath + '/')
-        self.model.setFileName(fullpath)
-        self.model.setBranches(self.data.getSymbolTree())
+        self.__data = PythonFile()
+        self.__data.process(filename, filepath + '/')
+        self.__model.setFileName(fullpath)
+        self.__model.setBranches(self.__data.getSymbolTree())
 
     def setWindowTitle(self, *filename):
         """ Set a normalised window title
@@ -248,7 +199,7 @@ class PyOutline(QMainWindow):
         if self.__xmi is None:
             self.__xmi = Xmi()
         try:
-            self.__xmi.setTree(self.data.getSymbolTree())
+            self.__xmi.setTree(self.__data.getSymbolTree())
             self.__xmi.write(filename)
         except ValueError:
             pass # inform: bad format for data
@@ -260,13 +211,6 @@ class PyOutline(QMainWindow):
 # Launch application
 app = QApplication(sys.argv)
 ui = PyOutline()
-
-server = SublimeServer(ui)
-thd = Thread(target=server.run)
-thd.setDaemon(True)
-thd.start()
-
-
 ui.show()
 
 sys.exit(app.exec_())
