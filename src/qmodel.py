@@ -71,11 +71,12 @@ class Tree(QStandardItemModel):
         self.setHorizontalHeaderLabels([title])
 
     def setBranches(self, branches):
-        """
-        Pass fully built tree to populate tree
+        """ Pass fully built tree to populate tree
+
         Clears existing tree if data exists,
         use with care
         """
-        # :delete existing data
+        if not branches:
+            return
         self.clear()
         self.__addBranches(branches)

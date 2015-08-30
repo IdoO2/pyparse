@@ -59,7 +59,8 @@ class PyOutline(QMainWindow):
         """
         content = QVBoxLayout()
         content.addWidget(self.__tree)
-        self.setGeometry(300, 300, 300, 150)
+        # x_pos, y_pos, width, height
+        self.setGeometry(450, 150, 400, 550)
         self.setCentralWidget(self.__tree)
         self.setWindowTitle()
         self.__buildMenu()
@@ -110,6 +111,7 @@ class PyOutline(QMainWindow):
         self.__data.process(filename, filepath + '/')
         self.__model.setFileName(fullpath)
         self.__model.setBranches(self.__data.getSymbolTree())
+        self.__tree.resizeColumnToContents(0)
 
     def setWindowTitle(self, *filename):
         """ Set a normalised window title
@@ -130,6 +132,7 @@ class PyOutline(QMainWindow):
     def expandAll(self):
         """ Expand all tree levels """
         self.__tree.expandAll()
+        self.__tree.resizeColumnToContents(0)
 
     def createXmi(self):
         """ Create XMI file """
