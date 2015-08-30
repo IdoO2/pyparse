@@ -17,10 +17,12 @@ class TreeItem(QStandardItem):
         for branch in branches:
             if isinstance(branch, tuple):
                 item = TreeItem(branch[0])
-                parent.appendRow(item)
+                item_data = TreeItem(branch[1]['type'])
+                parent.appendRow([item, item_data])
             else:
                 item = TreeItem(branch[0][0])
-                parent.appendRow(item)
+                item_data = TreeItem(branch[0][1]['type'])
+                parent.appendRow([item, item_data])
                 self.addBranches(branch[1:], item)
 
 class Tree(QStandardItemModel):
@@ -33,21 +35,29 @@ class Tree(QStandardItemModel):
     """
     def __init__(self, tree, filename):
         QStandardItemModel.__init__(self)
+        self.setColumnCount(2)
+        self.setHorizontalHeaderLabels(['Symbol', 'Details'])
+        if not tree:
+            return
         self.__addBranches(tree)
 
     def __addBranches(self, branches, parent=None):
         """
         Use to fully build tree
         Must be done on a clean tree
+        This method itself sets the first level and calls TreeItem
+        for sub-levels
         """
         parent = parent if parent else self.invisibleRootItem()
         for branch in branches:
             if isinstance(branch, tuple):
                 item = TreeItem(branch[0])
-                parent.appendRow(item)
+                item_data = TreeItem(branch[1]['type'])
+                parent.appendRow([item, item_data])
             elif isinstance(branch, list):
                 item = TreeItem(branch[0][0])
-                parent.insertRow(0, item)
+                item_data = TreeItem(branch[0][1]['type'])
+                parent.insertRow(0, [item, item_data])
                 item.addBranches(branch[1:], item)
             else:
                 raise ValueError
