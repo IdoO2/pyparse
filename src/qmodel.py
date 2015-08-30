@@ -48,7 +48,9 @@ class Tree(QStandardItemModel):
             datastr.append(branch_data['visibility'])
         datastr.append(branch_data['type'])
         if 'signature' in branch_data:
-            datastr.append(', '.join(branch_data['signature']))
+            signature = ', '.join(branch_data['signature'])
+            if signature:
+                datastr.append('({})'.format(signature))
         return ' '.join(datastr)
 
     def setFileName(self, filename):
