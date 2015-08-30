@@ -43,6 +43,7 @@ class PyOutline(QMainWindow):
 
         # View
         self.__tree = QTreeView()
+        self.__tree.setUniformRowHeights(True)
         self.__tree.setModel(self.__model)
 
         # Window layout with tree
