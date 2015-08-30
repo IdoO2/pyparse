@@ -37,7 +37,7 @@ class Tree(QStandardItemModel):
 
     def __addBranches(self, branches, parent=None):
         """
-        Use to fully build tre
+        Use to fully build tree
         Must be done on a clean tree
         """
         parent = parent if parent else self.invisibleRootItem()
@@ -45,10 +45,12 @@ class Tree(QStandardItemModel):
             if isinstance(branch, tuple):
                 item = TreeItem(branch[0])
                 parent.appendRow(item)
-            else:
+            elif isinstance(branch, list):
                 item = TreeItem(branch[0][0])
                 parent.insertRow(0, item)
                 item.addBranches(branch[1:], item)
+            else:
+                raise ValueError
 
     def setFileName(self, filename):
         """

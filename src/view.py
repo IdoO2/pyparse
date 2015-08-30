@@ -1,60 +1,7 @@
 #!/usr/bin/env python3.4
 #!-*- coding: utf8 -*-
-# Author: Daniel PATERSON
 
 # Note on performance: in our case, consider setting `uniformRowHeights = True`
-
-# Example file:
-# 1. class Master():
-# 2.   randval = 0
-# 3.   def __init__(self):
-# 4.     self.randval = 1
-# 5.     def change():
-# 6.       self.randval = 3
-
-# data = [['Import', ['Tkinter [2]', 'Button', 'Frame', 'Label', 'Pack'], ['pdb [3]', 'set_trace']], ['Variable', 'a [38]'], ['Fonction', 'main1 [5]', 'main2 [7]', 'test [33]'], ['Classes', ['ClickCounter [11]', ['Attribut', 'count + [18]', 'label[]  [19]', 'label  [22]', 'button  [24]', 'count  [31]'], ['Constructeur', '__init__ [27]'], ['Methode Publique', 'main3 [13]', 'main4 [14]', 'click [17]', 'createWidgets [21]']]]]
-
-
-# Example mapping found in `parser`
-# We will need a mapping from file string to model,
-# for two reasons:
-# - when a line / line are updated, wee need to find the model reference easily
-# - we need to uniquely identify possible homographs
-# Note: this means frequent updating; “extreme” case: user deletes 30 lines
-# Workflow:
-# - user changes line 3
-# - lookup mapping: line 3 holds (-2, 1)
-# - lookup model at [3-2][1]
-# - if symbol is modified, update model
-# Example 2:
-# - user changes line 4
-# - nothing found: reparse lines from 3 to 4 to extract symbols
-# Example 3:
-# - user deletes line 3
-# - reparse lines 3-2 to 3
-# - update model at [3-2][1] accordingly
-# - lookup mapping for children of 3
-# - recurse on line 5
-
-data = [
-  ['Import',
-    ['sqlite3 [10]', ''],
-    ['.conf [11]', '*']
-  ],
-  ['Classes',
-    ['DBC [13]',
-      ['Constructeur', '__init__ [17]'],
-      ['Methode Publique', 'addSymbol [73]', 'addFile [80]', 'getFileID [87]', 'getSymbolID [95]', 'updateEndLine [103]', 'updateSymbol [111]', 'getGlobalSymbols [121]', 'getClassSymbols [130]', 'close [139]'],
-      ['Methode Privé', '__save [26]', '__select [37]', '__getSymbols [47]', '__getGlobalSymbol [54]', '__getClassSymbol [61]']],
-     ['DBCZ [143]',
-      ['Constructeur', '__init__ [147]']]
-   ]
-]
-
-data = [['Import', ['re,sys [5]', ''], ['type_code [6]', '*'], ['time [7]', 'timezone'], ['types [8]', 'NoneType', 'TypeType']], ['Variable', 'test1 [10]', 'test2 [13]', 'a [17]', 'b [22]', 'c [24]', 'M [28]', 'rdic [51]', 'msg [249]', 'fd [253]'], ['Fonction', 'cleanLine [35]', 'execReg [42]', 'onliner [46]', 'onliner2 [47]'], ['Classes', ['Test1 [73]'], ['Test [76]', ['Constructeur', '__init__ [77]'], ['Methode Publique', 'test [79]']], ['CCode [81]', ['Attribut', 'varType [84]', 'include [88]', 'define [89]', 'typedef [90]', 'fonction [91]', 'vars [92]', 'txt [93]', 'symbol [94]'], ['Constructeur', '__init__ [83]'], ['Methode Publique', 'showSymbol [241]'], ['Methode Privé', '__preProcess [105]', '__addInclude [147]', '__addDefine [152]', '__addTypedef [165]', '__addFunction [174]', '__addVariable [183]', '__isTyped [206]', '__getSymbol [211]', '__setUse [227]']]]]
-
-
-
 
 # Helpers
 import inspect
@@ -115,9 +62,7 @@ class PyOutline(QMainWindow):
         self.setCentralWidget(self.__tree)
         self.setWindowTitle()
         self.__buildMenu()
-        #self.__model.setBranches([])
         self.__model.setBranches(self.__data.getSymbolTree())
-        #self.__model.setBranches([])
 
     def __buildMenu(self):
         """ Add menu bar elements
@@ -145,7 +90,6 @@ class PyOutline(QMainWindow):
 
         action_expand = view_menu.addAction('&Expand all')
         action_expand.triggered.connect(self.expandAll)
-
 
     def openFile(self):
         """ Menu action: open file

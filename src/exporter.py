@@ -7,16 +7,6 @@ class Xmi():
     # ET.Element
     __tree = None
 
-    # Map between human intuitive attribute names and XMI’s
-    __attr_map = {
-        'type': 'xmi:type',
-        'signature': 'signature'
-    }
-
-    __types = {
-        'class': 'uml:Class'
-    }
-
     def setTree(self, data):
         """ Public interface to recursive __addBranches
 
@@ -124,7 +114,6 @@ class Xmi():
         return ET.SubElement(parent, 'ownedAttribute', attrs)
 
     def __addOwnedParameters(self, parent, signature):
-        print('__addOwnedParameters')
         for s in range(len(signature)):
             ET.SubElement(parent, 'ownedParameter', {
                 'name': signature[s],
@@ -133,7 +122,6 @@ class Xmi():
         return parent
 
     def __addOwnedComment(self, parent, value):
-        print('__addOwnedComment')
         ET.SubElement(parent, 'ownedComment', {
             'body': value,
             'xmi:id': '0'
