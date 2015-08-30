@@ -1,26 +1,7 @@
 # Library; make this more granular
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-
-# Represents an item in the tree
-# Adds to QStandardItem a method to recursively add branche hierarchies
-class TreeItem(QStandardItem):
-    def addBranches(self, branches, parent=None):
-        """
-        Accepts either branch name as string
-        or tree structure as a list of strings:
-        [rootItem item1 item2 ... itemN]
-        Strings in list are converted to TreeItems
-        """
-        parent = parent if parent else self
-        for branch in branches:
-            if isinstance(branch, str):
-                item = TreeItem(branch)
-                parent.appendRow(item)
-            else:
-                item = TreeItem(branch[0])
-                parent.appendRow(item)
-                self.addBranches(branch[1:], item)
+from os import path as ospath
 
 class Tree(QStandardItemModel):
     """
@@ -32,45 +13,59 @@ class Tree(QStandardItemModel):
     """
     def __init__(self, tree, filename):
         QStandardItemModel.__init__(self)
+        self.setColumnCount(2)
+        self.setHorizontalHeaderLabels(['Symbol', 'Details'])
+        if not tree:
+            return
         self.__addBranches(tree)
 
     def __addBranches(self, branches, parent=None):
         """
-        Use to fully built tree to populate tree
+        Use to fully build tree
         Must be done on a clean tree
+        This method itself sets the first level and calls TreeItem
+        for sub-levels
         """
         parent = parent if parent else self.invisibleRootItem()
         for branch in branches:
-            if isinstance(branch, str):
-                item = TreeItem(branch)
-                parent.appendRow(item)
+            if isinstance(branch, tuple):
+                item = QStandardItem(branch[0])
+                item_data = QStandardItem(self.__buildSymbolData(branch[1]))
+                parent.appendRow([item, item_data])
+            elif isinstance(branch, list):
+                item = QStandardItem(branch[0][0])
+                item_data = QStandardItem(self.__buildSymbolData(branch[0][1]))
+                parent.insertRow(0, [item, item_data])
+                self.__addBranches(branch[1:], item)
             else:
-                item = TreeItem(branch[0])
-                parent.insertRow(0, item)
-                item.addBranches(branch[1:], item)
+                raise ValueError
+
+    def __buildSymbolData(self, branch_data):
+        """ Build a string from the attributes of given symbol
+        """
+        datastr = []
+        if 'visibility' in branch_data:
+            datastr.append(branch_data['visibility'])
+        datastr.append(branch_data['type'])
+        if 'signature' in branch_data:
+            datastr.append(', '.join(branch_data['signature']))
+        return ' '.join(datastr)
 
     def setFileName(self, filename):
         """
         Set filename in column header
         """
-        title = 'Inspecting "' + filename + '"'
+        path, name = ospath.split(filename)
+        title = 'Inspecting "{}" ({})'.format(name, path)
         self.setHorizontalHeaderLabels([title])
 
     def setBranches(self, branches):
-        """
-        Pass fully built tree to populate tree
+        """ Pass fully built tree to populate tree
+
         Clears existing tree if data exists,
         use with care
         """
-        # :delete existing data
+        if not branches:
+            return
+        self.clear()
         self.__addBranches(branches)
-
-    def addRow(self, index, branch, parent=None):
-        """ @see TreeItem.addBranches """
-        item = TreeItem(branch)
-        if parent and isinstance(parent, TreeItem):
-            parent.insertRow(index, item)
-        else: # root
-            assert 0 <= index <= self.rowCount()
-            # @todo: Use a TreeItem as root invisible item
-            self.invisibleRootItem().insertRow(index, item)

@@ -1,7 +1,41 @@
-#!/usr/bin/env python3.4
+#!/usr/bin/env python3
 #!-*- coding: utf8 -*-
+# Author: Daniel PATERSON
 
 # Note on performance: in our case, consider setting `uniformRowHeights = True`
+
+# Example file:
+# 1. class Master():
+# 2.   randval = 0
+# 3.   def __init__(self):
+# 4.     self.randval = 1
+# 5.     def change():
+# 6.       self.randval = 3
+
+# data = [['Import', ['Tkinter [2]', 'Button', 'Frame', 'Label', 'Pack'], ['pdb [3]', 'set_trace']], ['Variable', 'a [38]'], ['Fonction', 'main1 [5]', 'main2 [7]', 'test [33]'], ['Classes', ['ClickCounter [11]', ['Attribut', 'count + [18]', 'label[]  [19]', 'label  [22]', 'button  [24]', 'count  [31]'], ['Constructeur', '__init__ [27]'], ['Methode Publique', 'main3 [13]', 'main4 [14]', 'click [17]', 'createWidgets [21]']]]]
+
+
+# Example mapping found in `parser`
+# We will need a mapping from file string to model,
+# for two reasons:
+# - when a line / line are updated, wee need to find the model reference easily
+# - we need to uniquely identify possible homographs
+# Note: this means frequent updating; “extreme” case: user deletes 30 lines
+# Workflow:
+# - user changes line 3
+# - lookup mapping: line 3 holds (-2, 1)
+# - lookup model at [3-2][1]
+# - if symbol is modified, update model
+# Example 2:
+# - user changes line 4
+# - nothing found: reparse lines from 3 to 4 to extract symbols
+# Example 3:
+# - user deletes line 3
+# - reparse lines 3-2 to 3
+# - update model at [3-2][1] accordingly
+# - lookup mapping for children of 3
+# - recurse on line 5
+
 
 # Helpers
 import inspect
@@ -22,13 +56,14 @@ from PyQt5.QtGui import QIcon
 from qmodel import Tree
 from parser.python_file import PythonFile
 from parser.db_toolkit import DBC
-from exporter import Xmi
+from threading import Thread
+
+#network
+import parser.network_common as NC
+
 
 class PyOutline(QMainWindow):
     """ Handles UI: creates window, layout, adds a tree """
-
-    __xmi = None
-    __basepath = ''
 
     def __init__(self):
         """ Create window, set parser and model instances
@@ -39,15 +74,16 @@ class PyOutline(QMainWindow):
         self.__data = PythonFile()
 
         # Model
-        self.__model = Tree([], '')
+        self.__model = Tree(self.__data.getSymbolTree(), '')
 
         # View
         self.__tree = QTreeView()
-        self.__tree.setUniformRowHeights(True)
         self.__tree.setModel(self.__model)
 
         # Window layout with tree
         self.__buildWindow()
+
+####
 
     def __buildWindow(self):
         """ Create window
@@ -59,12 +95,11 @@ class PyOutline(QMainWindow):
         """
         content = QVBoxLayout()
         content.addWidget(self.__tree)
-        # x_pos, y_pos, width, height
-        self.setGeometry(450, 150, 400, 550)
+        self.setLayout(content)
+        self.setGeometry(300, 300, 300, 150)
         self.setCentralWidget(self.__tree)
         self.setWindowTitle()
-        self.__buildMenu()
-        self.__model.setBranches(self.__data.getSymbolTree())
+        # self.__buildMenu()
 
     def __buildMenu(self):
         """ Add menu bar elements
@@ -81,10 +116,6 @@ class PyOutline(QMainWindow):
         action_export = file_menu.addAction('Export to &XMI')
         action_export.triggered.connect(self.createXmi)
 
-        action_exit = file_menu.addAction('&Quit')
-        action_exit.setShortcut('Ctrl+Q')
-        action_exit.triggered.connect(self.close)
-
         # View
         view_menu =self.menuBar().addMenu('&View')
         action_collapse = view_menu.addAction('&Collapse all')
@@ -93,25 +124,26 @@ class PyOutline(QMainWindow):
         action_expand = view_menu.addAction('&Expand all')
         action_expand.triggered.connect(self.expandAll)
 
+
     def openFile(self):
         """ Menu action: open file
 
            Provide file chooser
            Given file, set file name for view and text for parser
         """
-        fullpath, type_ = QFileDialog.getOpenFileName(self, 'Open file for inspection', os.getenv('HOME'))
+        filepath, _type = QFileDialog.getOpenFileName(self, 'Open file for inspection', os.getenv('HOME'))
 
-        if not os.path.isfile(fullpath) or not os.access(fullpath, os.R_OK):
+        if not os.path.isfile(filepath) or not os.access(filepath, os.R_OK):
             return
 
-        filepath, filename = os.path.split(fullpath)
+        filename = re.findall(r'[^/\\]+$', filepath)[0]
+        filepath = filepath.replace(filename, '')
 
         self.setWindowTitle(filename)
         self.__data = PythonFile()
-        self.__data.process(filename, filepath + '/')
-        self.__model.setFileName(fullpath)
-        self.__model.setBranches(self.__data.getSymbolTree())
-        self.__tree.resizeColumnToContents(0)
+        self.__data.process(filename, filepath)
+        self.__model.setFileName(filename)
+        self.__model = Tree(self.__data.getSymbolTree(), '')
 
     def setWindowTitle(self, *filename):
         """ Set a normalised window title
@@ -121,39 +153,19 @@ class PyOutline(QMainWindow):
         if len(filename) is 0:
             super().setWindowTitle('PyParse')
         else:
-            path, name = os.path.split(filename[0])
-            self.__basepath = path
-            super().setWindowTitle('{} ({}) — Pyparse'.format(name, path))
+            super().setWindowTitle(filename[0] + ' — Pyparse')
 
     def collapseAll(self):
         """ Collapse all tree levels """
-        self.__tree.collapseAll()
+        pass
 
     def expandAll(self):
         """ Expand all tree levels """
-        self.__tree.expandAll()
-        self.__tree.resizeColumnToContents(0)
+        pass
 
     def createXmi(self):
         """ Create XMI file """
-        root = self.__basepath if self.__basepath != '' else os.getenv('HOME')
-        filename, type = QFileDialog.getSaveFileName(self, 'Open file for inspection', root)
-
-        path, name = os.path.split(filename)
-        if not os.access(path, os.R_OK):
-            return
-
-        if self.__xmi is None:
-            self.__xmi = Xmi()
-        try:
-            self.__xmi.setTree(self.__data.getSymbolTree())
-            self.__xmi.write(filename)
-        except ValueError as em:
-            print('bad format for data: {}'.format(em))
-        except RuntimeError as em:
-            print('should not be here: {}'.format(em))
-        except OSError as em:
-            print('inform: problem writing file {}'.format(em))
+        pass
 
 # Launch application
 app = QApplication(sys.argv)
