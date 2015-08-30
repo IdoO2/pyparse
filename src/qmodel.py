@@ -67,13 +67,3 @@ class Tree(QStandardItemModel):
         # :delete existing data
         self.clear()
         self.__addBranches(branches)
-
-    def addRow(self, index, branch, parent=None):
-        """ @see TreeItem.addBranches """
-        item = TreeItem(branch)
-        if parent and isinstance(parent, TreeItem):
-            parent.insertRow(index, item)
-        else: # root
-            assert 0 <= index <= self.rowCount()
-            # @todo: Use a TreeItem as root invisible item
-            self.invisibleRootItem().insertRow(index, item)
