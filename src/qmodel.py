@@ -3,28 +3,6 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from os import path as ospath
 
-# Represents an item in the tree
-# Adds to QStandardItem a method to recursively add branche hierarchies
-class TreeItem(QStandardItem):
-    def addBranches(self, branches, parent=None):
-        """
-        Accepts either branch name as string
-        or tree structure as a list of strings:
-        [rootItem item1 item2 ... itemN]
-        Strings in list are converted to TreeItems
-        """
-        parent = parent if parent else self
-        for branch in branches:
-            if isinstance(branch, tuple):
-                item = TreeItem(branch[0])
-                item_data = TreeItem(branch[1]['type'])
-                parent.appendRow([item, item_data])
-            else:
-                item = TreeItem(branch[0][0])
-                item_data = TreeItem(branch[0][1]['type'])
-                parent.appendRow([item, item_data])
-                self.addBranches(branch[1:], item)
-
 class Tree(QStandardItemModel):
     """
     Model to hold the tree structure
@@ -51,14 +29,14 @@ class Tree(QStandardItemModel):
         parent = parent if parent else self.invisibleRootItem()
         for branch in branches:
             if isinstance(branch, tuple):
-                item = TreeItem(branch[0])
-                item_data = TreeItem(branch[1]['type'])
+                item = QStandardItem(branch[0])
+                item_data = QStandardItem(branch[1]['type'])
                 parent.appendRow([item, item_data])
             elif isinstance(branch, list):
-                item = TreeItem(branch[0][0])
-                item_data = TreeItem(branch[0][1]['type'])
+                item = QStandardItem(branch[0][0])
+                item_data = QStandardItem(branch[0][1]['type'])
                 parent.insertRow(0, [item, item_data])
-                item.addBranches(branch[1:], item)
+                self.__addBranches(branch[1:], item)
             else:
                 raise ValueError
 
