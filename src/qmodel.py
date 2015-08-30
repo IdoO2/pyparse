@@ -30,15 +30,26 @@ class Tree(QStandardItemModel):
         for branch in branches:
             if isinstance(branch, tuple):
                 item = QStandardItem(branch[0])
-                item_data = QStandardItem(branch[1]['type'])
+                item_data = QStandardItem(self.__buildSymbolData(branch[1]))
                 parent.appendRow([item, item_data])
             elif isinstance(branch, list):
                 item = QStandardItem(branch[0][0])
-                item_data = QStandardItem(branch[0][1]['type'])
+                item_data = QStandardItem(self.__buildSymbolData(branch[0][1]))
                 parent.insertRow(0, [item, item_data])
                 self.__addBranches(branch[1:], item)
             else:
                 raise ValueError
+
+    def __buildSymbolData(self, branch_data):
+        """ Build a string from the attributes of given symbol
+        """
+        datastr = []
+        if 'visibility' in branch_data:
+            datastr.append(branch_data['visibility'])
+        datastr.append(branch_data['type'])
+        if 'signature' in branch_data:
+            datastr.append(', '.join(branch_data['signature']))
+        return ' '.join(datastr)
 
     def setFileName(self, filename):
         """
