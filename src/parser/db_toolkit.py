@@ -191,6 +191,7 @@ class DBC():
             str(file_id),
             ';'
         ])
+
         return self.__select(select)
 
     def close(self):

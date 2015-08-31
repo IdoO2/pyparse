@@ -1,8 +1,20 @@
 #!/bin/bash
 
-if [ ! -f src/parser/db/db-symbol ]
+
+if [ $1 == "-t" ]
 then
-    sh init.sh
+	for file in utests/*.py
+	do
+		python3 $file
+	done
+else
+	if [ ! -f src/parser/db/db-symbol ]
+	then
+		sh init.sh
+	fi
+	python3 src/view.py
 fi
 
-python src/view.py
+
+
+#python3 src/view.py

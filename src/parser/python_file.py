@@ -165,6 +165,7 @@ class PythonFile(File) :
                 if typ == SYM_ATTR_CLASS : # si c'est un attribut de classe on l'ajoute au code de la classe
                     tmp = CDIC[typ]()
                     tmp.register(self.ID, l, clas().id)
+                    l.context = tmp.id
                     tmp.updateEline()
                     clas().addCode(l)
                     continue
@@ -244,7 +245,9 @@ class PythonFile(File) :
                         )
                     else :
                         level.append(
-                            (getName(sub_symbol), {'type': getType(sub_symbol), 'visibility': getVisi(sub_symbol)})
+                            (getName(sub_symbol), {
+                                'type': getType(sub_symbol),
+                                'visibility': getVisi(sub_symbol)})
                         )
 
                 tree.append(level)
