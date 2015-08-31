@@ -38,6 +38,7 @@ class Symbol(object) :
         if not res : LOG('Err on register')
         else :
             self.id = self.__getID() # sets id when it's correctly registered
+            return True
 
     def __getID(self) :
         """Gets current file ID in database"""
@@ -63,7 +64,7 @@ class Symbol(object) :
         self.eline   = code.nline   # last line
         self.uline   = []           # array of lines using this symbol
         self.code    = [code]       # array of CodeLine instance: store the contains of the symbol
-        self.__save()               # database registration
+        return self.__save()               # database registration
 
 
     def show(self) :
@@ -77,6 +78,10 @@ class Symbol(object) :
         """Updates symbol end line when scanning is done"""
         values = [self.iline + len(self.code) - 1, self.id_file, self.iline]
         return self.DBC.updateEndLine(values)
+
+    def symbRepr(self) :
+        """return an array representative of current Symbol"""
+        return [str(self.id_file) + ' ' + str(self.iline) + ' [' + str(self.stype) + ']']
 
     def addCode(self, code) :
         """Add a instance of CodeLine to self.code array"""

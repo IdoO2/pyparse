@@ -1,3 +1,9 @@
+import sys
+import os
+sys.path.append(sys.path.append(\
+  os.sep.join(os.getcwd().split(os.sep)[:os.getcwd().split(os.sep).index('pyparse')]+['pyparse' + os.sep]))) #fixing python path
+
+
 from src.exporter import Xmi
 import unittest
 
