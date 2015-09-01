@@ -1,1 +1,10 @@
-[(None, {'type': None})]
+[('.',
+  {'signature': [' conf',
+                 'db_toolkit',
+                 'common',
+                 'python_type',
+                 'python_code_line',
+                 'python_common',
+                 'python_file',
+                 ''],
+   'type': 'import'})]

@@ -1,1 +1,4 @@
-[(None, {'type': None})]
+[('OpenGL.GL', {'signature': ['*'], 'type': 'import'}),
+ ('OpenGL.GLUT', {'signature': ['*'], 'type': 'import'}),
+ ('paint', {'signature': [''], 'type': 'function'}),
+ ('reshape', {'signature': ['width', 'height'], 'type': 'function'})]

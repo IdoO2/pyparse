@@ -1,1 +1,2 @@
-[(None, {'type': None})]
+[('sing', {'signature': ['b', 'end'], 'type': 'function'}),
+ ('a', {'type': 'variable'})]
