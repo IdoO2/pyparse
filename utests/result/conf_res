@@ -1,1 +1,7 @@
-[(None, {'type': None})]
+[('pdb', {'signature': [''], 'type': 'import'}),
+ ('sys', {'signature': [''], 'type': 'import'}),
+ ('LOG', {'type': 'variable'}),
+ ('DBG', {'type': 'variable'}),
+ ('TEST_DIRECTORY', {'type': 'variable'}),
+ ('DB_SYMBOL', {'type': 'variable'}),
+ ('DB_STRUCT', {'type': 'variable'})]

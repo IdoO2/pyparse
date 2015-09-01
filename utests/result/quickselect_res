@@ -1,1 +1,10 @@
-[(None, {'type': None})]
+[('random', {'signature': [''], 'type': 'import'}),
+ ('partition',
+  {'signature': ['vector', 'left', 'right', 'pivotIndex'],
+   'type': 'function'}),
+ ('_select',
+  {'signature': ['vector', 'left', 'right', 'k'], 'type': 'function'}),
+ ('select',
+  {'signature': ['vector', 'k', 'left=None', 'right=None'],
+   'type': 'function'}),
+ ('v', {'type': 'variable'})]

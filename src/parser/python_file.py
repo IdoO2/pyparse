@@ -203,6 +203,9 @@ class PythonFile(File) :
             elif s[6] in tmp_tree and str(s[4]) + str(s[6]) not in name :
                 tmp_tree[s[6]][1][s[0]] = [s, {}]
                 name.append(str(s[4]) + str(s[6]))
+            else :
+                print ('result:', s)
+
 
         return tmp_tree
 
@@ -267,4 +270,5 @@ class PythonFile(File) :
         symbol_tree = self.__buildTree(symbols)
         self.__tree = self.__translateTree(symbol_tree)
 
+        print (self.__tree)
         return self.__tree if self.__tree else []
