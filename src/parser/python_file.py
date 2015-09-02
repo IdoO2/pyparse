@@ -6,7 +6,7 @@
 This File implements the specific code for handling a Python File.
 PreProcess of a file and scanning structure are defined here.
 """
-
+from pprint import *
 import pdb
 import re
 from .conf import *
@@ -191,25 +191,27 @@ class PythonFile(File) :
 
             TODO: handle more than two levels (recurse)
         """
+        symb_map = {}
         tmp_tree = {}
         name = []
+        i = 0
         # symbol entries are: 0-id, 1-first line number, 2-type, 3-visibility, 4-name, 5-args, 6-parent
         if not symbols : return {}
 
-        for s in symbols:
+        while i < len(symbols) :
+            s = symbols[i]
+            symb_map.update({s[0]: i})
             if s[6] is None and str(s[4]) + str(s[6]) not in name :
-                tmp_tree[s[0]] = [s, {}]
+                tmp_tree[i] = [s, {}]
                 name.append(str(s[4]) + str(s[6]))
-            elif s[6] in tmp_tree and str(s[4]) + str(s[6]) not in name :
-                tmp_tree[s[6]][1][s[0]] = [s, {}]
+            elif s[6] in symb_map and str(s[4]) + str(s[6]) not in name :
+                tmp_tree[symb_map[s[6]]][1][i] = [s, {}]
                 name.append(str(s[4]) + str(s[6]))
-            else :
-                print ('result:', s)
+            i += 1
 
+        return symb_map, tmp_tree
 
-        return tmp_tree
-
-    def __translateTree(self, tmp_tree):
+    def ___translateTree(self, tmp_tree):
         """ Convert transitional tree structure to public standards
 
             TODO: handle more than two levels (recurse)
@@ -257,6 +259,55 @@ class PythonFile(File) :
 
         return tree
 
+    def __translateTree(self, tmp_tree):
+        """ Convert transitional tree structure to public standards
+
+            TODO: handle more than two levels (recurse)
+        """
+        getName = lambda x : x[4]
+        getType = lambda x : x[2]
+        getVisi = lambda x : x[3]
+        getSign = lambda x : x[5].split('|')
+
+        tree = []
+        level = []
+
+        for l in sorted(tmp_tree.keys()):
+            symbol = tmp_tree[l][0]
+            pprint (symbol)
+            if not tmp_tree[l][1]:
+                if getType(symbol) in ['function', 'import'] :
+                    tree.append(
+                        (getName(symbol), {'type': getType(symbol), 'signature': getSign(symbol)})
+                    )
+                else :
+                    tree.append(
+                        (getName(symbol), {'type': getType(symbol)})
+                    )
+            else:
+                level = [(getName(symbol), {'type': symbol[2]})]
+                for k in sorted(tmp_tree[l][1].keys()) :
+                    sub_symbol = tmp_tree[l][1][k][0]
+
+                    if getType(sub_symbol) in ['method', 'constructor'] :
+                        level.append(
+                            (getName(sub_symbol), {
+                                'type': getType(sub_symbol),
+                                'visibility': getVisi(sub_symbol),
+                                'signature': getSign(sub_symbol)})
+                        )
+                    else :
+                        level.append(
+                            (getName(sub_symbol), {
+                                'type': getType(sub_symbol),
+                                'visibility': getVisi(sub_symbol)})
+                        )
+
+                tree.append(level)
+
+        return tree
+
+
     def getSymbolTree(self):
         """ Return symbol tree for GUI"""
 
@@ -267,8 +318,7 @@ class PythonFile(File) :
         symbols = self.DBC.getFileSymbols(self.ID)
 
         # Populate data structure with db symbols
-        symbol_tree = self.__buildTree(symbols)
+        symb_map, symbol_tree = self.__buildTree(symbols)
         self.__tree = self.__translateTree(symbol_tree)
 
-        print (self.__tree)
         return self.__tree if self.__tree else []

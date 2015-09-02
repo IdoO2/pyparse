@@ -35,7 +35,7 @@ class Tree(QStandardItemModel):
             elif isinstance(branch, list):
                 item = QStandardItem(branch[0][0])
                 item_data = QStandardItem(self.__buildSymbolData(branch[0][1]))
-                parent.insertRow(0, [item, item_data])
+                parent.appendRow([item, item_data])
                 self.__addBranches(branch[1:], item)
             else:
                 raise ValueError
