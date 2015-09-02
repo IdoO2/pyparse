@@ -1,13 +1,22 @@
 #!/bin/bash
 
 
-if [ $1 == "-t" ]
+if [ $# -eq 1 ] && [ $1 == "-t" ] #run unit test
 then
 	for file in utests/*.py
 	do
 		python3 $file
 	done
-else
+
+elif [ $# -eq 1 ] && [ $1 == "-st" ] #run unit with st
+then
+  if [ ! -f src/parser/db/db-symbol ]
+  then
+    sh init.sh
+  fi
+  python3 src/view.py -sublime
+
+else # run stand-alone mode
 	if [ ! -f src/parser/db/db-symbol ]
 	then
 		sh init.sh

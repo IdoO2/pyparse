@@ -1,4 +1,5 @@
-[('OpenGL.GL', {'signature': ['*'], 'type': 'import'}),
- ('OpenGL.GLUT', {'signature': ['*'], 'type': 'import'}),
- ('paint', {'signature': [''], 'type': 'function'}),
- ('reshape', {'signature': ['width', 'height'], 'type': 'function'})]
+[('OpenGL.GL', {'line': 5, 'signature': ['*'], 'type': 'import'}),
+ ('OpenGL.GLUT', {'line': 6, 'signature': ['*'], 'type': 'import'}),
+ ('paint', {'line': 8, 'signature': [''], 'type': 'function'}),
+ ('reshape',
+  {'line': 28, 'signature': ['width', 'height'], 'type': 'function'})]

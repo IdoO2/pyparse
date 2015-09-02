@@ -18,7 +18,7 @@ class ModelTestCase(unittest.TestCase):
     ]
 
     def setUp(self):
-        self.tree = Tree([[('master', {'type': 'class'})]], '~/filename.py')
+        self.tree = Tree([[('master', {'type': 'class', 'line': 22})]], '~/filename.py')
 
     def test_setBranches(self):
         # Ill formatted tree
