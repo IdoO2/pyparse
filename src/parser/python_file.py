@@ -37,7 +37,7 @@ class PythonFile(File) :
             . tabulations are changed in whitespaces
             . multiline are changed in one line"""
         txt = self.__comment(txt)
-        self.IDENT = self.__setIndent(txt) # indentation size
+        self.IDENT = self.__setIndent(txt + '\n') # indentation size
         arr_txt = txt.replace('\t', ' ' * self.IDENT).split(self.LINE_END)
         i = 0
 
@@ -209,55 +209,7 @@ class PythonFile(File) :
                 name.append(str(s[4]) + str(s[6]))
             i += 1
 
-        return symb_map, tmp_tree
-
-    def ___translateTree(self, tmp_tree):
-        """ Convert transitional tree structure to public standards
-
-            TODO: handle more than two levels (recurse)
-        """
-        getName = lambda x : x[4]
-        getType = lambda x : x[2]
-        getVisi = lambda x : x[3]
-        getSign = lambda x : x[5].split('|')
-
-        tree = []
-        level = []
-
-        for l in tmp_tree:
-            symbol = tmp_tree[l][0]
-
-            if not tmp_tree[l][1]:
-                if getType(symbol) in ['function', 'import'] :
-                    tree.append(
-                        (getName(symbol), {'type': getType(symbol), 'signature': getSign(symbol)})
-                    )
-                else :
-                    tree.append(
-                        (getName(symbol), {'type': getType(symbol)})
-                    )
-            else:
-                level = [(getName(symbol), {'type': symbol[2]})]
-                for k in tmp_tree[l][1]:
-                    sub_symbol = tmp_tree[l][1][k][0]
-
-                    if getType(sub_symbol) in ['method', 'constructor'] :
-                        level.append(
-                            (getName(sub_symbol), {
-                                'type': getType(sub_symbol),
-                                'visibility': getVisi(sub_symbol),
-                                'signature': getSign(sub_symbol)})
-                        )
-                    else :
-                        level.append(
-                            (getName(sub_symbol), {
-                                'type': getType(sub_symbol),
-                                'visibility': getVisi(sub_symbol)})
-                        )
-
-                tree.append(level)
-
-        return tree
+        return tmp_tree
 
     def __translateTree(self, tmp_tree):
         """ Convert transitional tree structure to public standards
@@ -268,24 +220,25 @@ class PythonFile(File) :
         getType = lambda x : x[2]
         getVisi = lambda x : x[3]
         getSign = lambda x : x[5].split('|')
+        getLine = lambda x : x[1]
 
         tree = []
         level = []
 
         for l in sorted(tmp_tree.keys()):
             symbol = tmp_tree[l][0]
-            pprint (symbol)
+
             if not tmp_tree[l][1]:
                 if getType(symbol) in ['function', 'import'] :
                     tree.append(
-                        (getName(symbol), {'type': getType(symbol), 'signature': getSign(symbol)})
+                        (getName(symbol), {'type': getType(symbol), 'signature': getSign(symbol), 'line': getLine(symbol)})
                     )
                 else :
                     tree.append(
-                        (getName(symbol), {'type': getType(symbol)})
+                        (getName(symbol), {'type': getType(symbol), 'line': getLine(symbol)})
                     )
             else:
-                level = [(getName(symbol), {'type': symbol[2]})]
+                level = [(getName(symbol), {'type': symbol[2], 'line': symbol[1]})]
                 for k in sorted(tmp_tree[l][1].keys()) :
                     sub_symbol = tmp_tree[l][1][k][0]
 
@@ -294,13 +247,17 @@ class PythonFile(File) :
                             (getName(sub_symbol), {
                                 'type': getType(sub_symbol),
                                 'visibility': getVisi(sub_symbol),
-                                'signature': getSign(sub_symbol)})
+                                'signature': getSign(sub_symbol),
+                                'line': getLine(sub_symbol)
+                            })
                         )
                     else :
                         level.append(
                             (getName(sub_symbol), {
                                 'type': getType(sub_symbol),
-                                'visibility': getVisi(sub_symbol)})
+                                'visibility': getVisi(sub_symbol),
+                                'line': getLine(sub_symbol)
+                            })
                         )
 
                 tree.append(level)
@@ -318,7 +275,7 @@ class PythonFile(File) :
         symbols = self.DBC.getFileSymbols(self.ID)
 
         # Populate data structure with db symbols
-        symb_map, symbol_tree = self.__buildTree(symbols)
+        symbol_tree = self.__buildTree(symbols)
         self.__tree = self.__translateTree(symbol_tree)
 
         return self.__tree if self.__tree else []

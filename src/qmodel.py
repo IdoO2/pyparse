@@ -41,8 +41,7 @@ class Tree(QStandardItemModel):
                 raise ValueError
 
     def __buildSymbolData(self, branch_data):
-        """ Build a string from the attributes of given symbol
-        """
+        """ Build a string from the attributes of given symbol"""
         datastr = []
         if 'visibility' in branch_data:
             datastr.append(branch_data['visibility'])
@@ -51,6 +50,7 @@ class Tree(QStandardItemModel):
             signature = ', '.join(branch_data['signature'])
             if signature:
                 datastr.append('({})'.format(signature))
+        datastr.append('[{}]'.format(branch_data['line']))
         return ' '.join(datastr)
 
     def setFileName(self, filename):

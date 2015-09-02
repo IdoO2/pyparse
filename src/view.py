@@ -6,7 +6,6 @@
 # Helpers
 import inspect
 from pprint import pprint
-import pdb
 
 # Libraries
 import re
@@ -15,14 +14,21 @@ import os
 from PyQt5.QtWidgets import (QTreeView, QApplication,
                             QMainWindow, QWidget, QVBoxLayout,
                             QFileDialog, QAbstractItemView, QAction, qApp)
-from PyQt5.QtCore import QDir, Qt, QStringListModel
-from PyQt5.QtGui import QIcon
+from threading import Thread
+from sublime_text.gui_side import SublimeServer, showSymb
 
 # Application
 from qmodel import Tree
 from parser.python_file import PythonFile
-from parser.db_toolkit import DBC
 from exporter import Xmi
+
+class PyTreeView(QTreeView) :
+    def mouseDoubleClickEvent (self, event) :
+        data = self.currentIndex().data()
+        res = re.findall('\[([^\]]*)\]', data)
+        if res :
+            showSymb(res[0])
+
 
 class PyOutline(QMainWindow):
     """ Handles UI: creates window, layout, adds a tree """
@@ -35,16 +41,19 @@ class PyOutline(QMainWindow):
         """
         QMainWindow.__init__(self)
 
+        # is linked to st ?
+        self.stUse = False
+
         # Parser instance
         self.__data = PythonFile()
 
         # Model
-        self.__model = Tree([], '')
+        self.model = Tree([], '')
 
         # View
-        self.__tree = QTreeView()
+        self.__tree = PyTreeView()
         self.__tree.setUniformRowHeights(True)
-        self.__tree.setModel(self.__model)
+        self.__tree.setModel(self.model)
 
         # Window layout with tree
         self.__buildWindow()
@@ -64,7 +73,7 @@ class PyOutline(QMainWindow):
         self.setCentralWidget(self.__tree)
         self.setWindowTitle()
         self.__buildMenu()
-        self.__model.setBranches(self.__data.getSymbolTree())
+        self.model.setBranches(self.__data.getSymbolTree())
 
     def __buildMenu(self):
         """ Add menu bar elements
@@ -109,8 +118,8 @@ class PyOutline(QMainWindow):
         self.setWindowTitle(filename)
         self.__data = PythonFile()
         self.__data.process(filename, filepath + '/')
-        self.__model.setFileName(fullpath)
-        self.__model.setBranches(self.__data.getSymbolTree())
+        self.model.setFileName(fullpath)
+        self.model.setBranches(self.__data.getSymbolTree())
         self.__tree.resizeColumnToContents(0)
 
     def setWindowTitle(self, *filename):
@@ -158,6 +167,13 @@ class PyOutline(QMainWindow):
 # Launch application
 app = QApplication(sys.argv)
 ui = PyOutline()
+
+if len(sys.argv) == 2 and sys.argv[1] == '-sublime' :
+    server = SublimeServer(ui)
+    thd = Thread(target=server.run)
+    thd.setDaemon(True)
+    thd.start()
+
 ui.show()
 
 sys.exit(app.exec_())
