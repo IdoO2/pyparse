@@ -14,7 +14,3 @@ else
 	fi
 	python3 src/view.py
 fi
-
-
-
-#python3 src/view.py
