@@ -73,7 +73,7 @@ class PyOutline(QMainWindow):
         self.setCentralWidget(self.__tree)
         self.setWindowTitle()
         self.__buildMenu()
-        self.model.setBranches(self.__data.getSymbolTree())
+        self.model.setBranches([])
 
     def __buildMenu(self):
         """ Add menu bar elements
