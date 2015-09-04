@@ -50,13 +50,13 @@ class Xmi():
         for branch in branches:
             type_ = type(branch)
             if type_ is tuple:
-                if branch[1]['type'] is 'class':
+                if branch[1]['type'] in ['class']:
                     self.__addPackagedElement(parent, branch)
                 elif branch[1]['type'] in ['function', 'method', 'constructor']:
                     node = self.__addOwnedOperation(parent, branch)
                 elif branch[1]['type'] in ['attribute', 'variable', 'import']:
                     self.__addOwnedAttribute(parent, branch)
-                elif branch[1]['type'] is 'comment':
+                elif branch[1]['type'] in ['comment']:
                     self.__addOwnedComment(parent, branch[0])
                 else:
                     raise ValueError('Unknown node type {}'.format(branch[1]['type']))
