@@ -1,14 +1,14 @@
 #!/bin/bash
 
 
-if [ $# -eq 1 ] && [ $1 == "-t" ] #run unit test
+if [ "$#" -eq 1 ] && [ "$1" == '-t' ] #run unit test
 then
 	for file in utests/*.py
 	do
 		python3 $file
 	done
 
-elif [ $# -eq 1 ] && [ $1 == "-st" ] #run unit with st
+elif [ "$#" -eq 1 ] && [ "$1" == '-st' ] #run unit with st
 then
   if [ ! -f src/parser/db/db-symbol ]
   then
