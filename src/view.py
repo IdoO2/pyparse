@@ -1,12 +1,6 @@
 #!/usr/bin/env python3.4
 #!-*- coding: utf8 -*-
 
-# Note on performance: in our case, consider setting `uniformRowHeights = True`
-
-# Helpers
-import inspect
-from pprint import pprint
-
 # Libraries
 import re
 import sys

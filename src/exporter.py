@@ -1,4 +1,3 @@
-from pprint import pprint
 import xml.etree.ElementTree as ET
 
 class Xmi():
@@ -19,7 +18,6 @@ class Xmi():
 
             @raise RuntimError
             @raise OSError
-            Returns written byte count (0 for none, -1 for error)
         """
         if self.__tree is None:
             raise RuntimeError
@@ -46,22 +44,21 @@ class Xmi():
             toplevel = True
             parent = self.__tree
 
-        # pprint(branches)
         for branch in branches:
             type_ = type(branch)
             if type_ is tuple:
-                if branch[1]['type'] in ['class']:
+                if branch[1]['type'] == 'class':
                     self.__addPackagedElement(parent, branch)
                 elif branch[1]['type'] in ['function', 'method', 'constructor']:
                     node = self.__addOwnedOperation(parent, branch)
                 elif branch[1]['type'] in ['attribute', 'variable', 'import']:
                     self.__addOwnedAttribute(parent, branch)
-                elif branch[1]['type'] in ['comment']:
+                elif branch[1]['type'] == 'comment':
                     self.__addOwnedComment(parent, branch[0])
                 else:
                     raise ValueError('Unknown node type {}'.format(branch[1]['type']))
             elif type_ is list:
-                if toplevel or 'type' in branch[0][1] and branch[0][1]['type'] is 'class':
+                if toplevel or 'type' in branch[0][1] and branch[0][1]['type'] == 'class':
                     node = self.__addPackagedElement(parent, branch[0])
                 else:
                     node = self.__addOwnedOperation(parent, branch[0])
@@ -70,7 +67,6 @@ class Xmi():
     def __addPackagedElement(self, parent, node):
         """ packagedElement nodes are the highest level entries
         """
-        print('\t__addPackagedElement')
         attrs = {
             'name': node[0],
             'xmi:type': node[1]['type'],
@@ -84,7 +80,6 @@ class Xmi():
     def __addOwnedOperation(self, parent, node):
         """ ownedOperation nodes represent a callable (function, method)
         """
-        print('\t__addOwnedOperation')
         attrs = {
             'name': node[0],
             'xmi:type': 'uml:Operation',
@@ -103,7 +98,6 @@ class Xmi():
     def __addOwnedAttribute(self, parent, node):
         """ ownedAttribute nodes represent a class attribute
         """
-        print('_addOwnedAttribute')
         attrs = {'name': node[0]}
         attrs['xmi:id'] = '0'
         if 'type' in node[1]:
