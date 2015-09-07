@@ -106,10 +106,11 @@ class File(object) :
     ### PRIVATE METHODS
 
     def __setLineEndings(self, full_text):
-        """Set line endings (unix or windows)"""
-        res = re.findall('(\n|\c\r)', full_text)
-        if not res : return
-        return res[0]
+        """ Set line endings (unix or windows) """
+        le = re.search('(\n|\c\r)', full_text)
+        if not le:
+            raise RuntimeError('Unable to determine line endings type')
+        self.LINE_END = le.group()
 
     def __register(self) :
         """Register file in database"""
@@ -141,10 +142,10 @@ class File(object) :
         code          = fd.read() # get file content
         fd.close()
 
-        self.LINE_END = self.__setLineEndings(code) # set line ending style
-        self.FNAME    = fname  # file name
-        self.FPATH    = fpath  # file path
-        self.ICODE    = code   # initiale file content
+        self.__setLineEndings(code)
+        self.FNAME = fname # file name
+        self.FPATH = fpath # file path
+        self.ICODE = code # initiale file content
 
         self.__register() # register file in database
         self.ID = self.__getID() # get file ID
