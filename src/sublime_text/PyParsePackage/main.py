@@ -63,11 +63,11 @@ class EventDump(sublime_plugin.EventListener):
     def on_activated(self, view):
         wdic = (view.window().extract_variables())
         if "file_name" in wdic and '.py' in wdic["file_name"] :
-            try :
+            try:
                 changeFile([wdic["file_name"], wdic["file_path"]])
-            except :
-                print ('error')
-                pass
+            except Exception as em:
+                print ('PyParse error: {}'.format(em))
+                return
         wdic = (view.window().extract_variables())
 
     def on_post_save (self, view) :
