@@ -48,14 +48,24 @@ class SublimeServer(object) :
         return "UPDT OK"
 
     def serverProcess(self, idata, add_data) :
-    # on récupère la donnée et on dirige les requêtes vers les bonnes fonctions
+        """ Attempts to make sense of information from incoming requests
+
+            Data is space separated
+            The first four characters of idata indicate expected operation
+        """
         idata.replace('\n', '')
-        op = idata[0:4]
+        action = idata[0:4]
         qry = idata[4:]
 
-        if op == "PROC" :
-            return self.__process(qry.split())
-        elif op == "UPDT" :
+        if action == "PROC":
+            # Expected: `filename full/path/to/file_folder`
+            # Fortunately file names never include spaces
+            spc_sep_parts = qry.split()
+            return self.__process([
+                spc_sep_parts[0],
+                ' '.join(spc_sep_parts[1:])
+            ])
+        elif action == "UPDT" :
             return self.__update(qry.split())
         else :
             return "ERROR " + idata
