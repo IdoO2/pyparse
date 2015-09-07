@@ -10,6 +10,7 @@ This file implements 2 general class usable for every languages:
 
 from .db_toolkit import DBC
 from .conf import *
+import os
 import re
 
 class Symbol(object) :
@@ -136,10 +137,13 @@ class File(object) :
 
     ### PUBLIC METHODS
 
-    def process(self, fname, fpath) :
+    def process(self, fname, fpath):
         """Process a file"""
-        fd            = open(fpath + fname, 'r')
-        code          = fd.read() # get file content
+        fullpath = fpath + fname
+        if not os.path.isfile(fullpath) or not os.access(fullpath, os.R_OK):
+            raise RuntimeError('File {} is not readable'.format(fullpath))
+        fd = open(fullpath, 'r')
+        code = fd.read() # get file content
         fd.close()
 
         self.__setLineEndings(code)
