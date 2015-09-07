@@ -13,7 +13,6 @@ import src.sublime_text.network_common as NC
 
 
 def showSymb(line) :
-    print("showSymb", line)
     s = NC.initClient("127.0.0.1", 1254)
     qry = 'SHOW' + str(line)
     s.sendall((qry + '\n').encode('utf-8'))

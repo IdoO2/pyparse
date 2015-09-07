@@ -43,7 +43,6 @@ def serverLoop(sock, addr, callback, add_data=[]):
         if "close" == data.rstrip(): break # type 'close' on client console to close connection from the server side
 
     sock.close()
-    print (addr, "- closed connection") #log on console
 
 
 
@@ -72,7 +71,6 @@ def initClient(host, port) :
     print('could not open socket')
     sys.exit(1)
   else :
-    print('Connected on', str(host) + ':' + str(port))
     return s
 
 
@@ -112,7 +110,6 @@ def initFServer(port, loop=serverLoop, process=lambda x, d: x, add_data=[]) :
     csock, addr = s.accept()
     if s is None:
       sys.exit('could not open socket')
-    print ('...connected from:', addr)
     try :
       t = os.fork()
     except OSError as e :
@@ -122,7 +119,6 @@ def initFServer(port, loop=serverLoop, process=lambda x, d: x, add_data=[]) :
     if (t != 0) :
       csock.close()
     else :
-      print('Connected by', addr)
       s.close()
       loop(csock, addr, process, add_data)
       exit(0)
@@ -139,9 +135,7 @@ def initTServer(port, loop=serverLoop, process=lambda x, d: x, add_data=[]) :
     raise
 
   while True:
-    print ('waiting for connection... listening on port', port)
     csock, addr = serversock.accept()
-    print ('...connected from:', addr)
     thd = Thread(target=loop, args=(csock, addr, process, add_data))
     thd.setDaemon(True)
     thd.start()

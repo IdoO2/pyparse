@@ -9,7 +9,6 @@ server = None
 
 
 def changeFile(data) :
-    print ('change')
     file_path, file_name = data
     s = NC.initClient("127.0.0.1", 1255)
     qry = 'PROC' + file_path + ' ' + file_name
@@ -30,7 +29,6 @@ def lauchServer() :
 class AnalyzerServerST(object) :
     def __sync(self) :
         self.isSync = True
-        print ("synced...")
         return "SYNC OK"
 
     def __show(self, data) :
@@ -40,7 +38,6 @@ class AnalyzerServerST(object) :
         return "SHOW OK"
 
     def __replace(self, data) :
-        print ("replace", data[0], data[1])
         return
 
     def serverProcess(self, idata, add_data) :
@@ -72,15 +69,11 @@ class EventDump(sublime_plugin.EventListener):
                 print ('error')
                 pass
         wdic = (view.window().extract_variables())
-        print (view.file_name(), "is now the active view")
-        print (server)
 
     def on_post_save (self, view) :
-        print (view.file_name(), "saved")
-
+        pass
 
 if not NC.checkPort('127.0.0.1', 1254) :
-    print ("starting analyser server")
     thd = Thread(target=lauchServer)
     thd.setDaemon(True)
     thd.start()
