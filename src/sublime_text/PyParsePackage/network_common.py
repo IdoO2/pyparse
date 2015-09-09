@@ -15,18 +15,14 @@ import os
 def checkPort(host, port) :
   # Create a TCP socket
   s = S.socket()
-  print ("Attempting to connect to", host, "on port", port)
   try:
     s.connect((host, port))
-    print ("Connected to", host, "on port", port)
     return True
   except S.error :
     print ("Connection to", host ,"on port", port,"failed")
     return False
 
 def _checkPort(host, port) :
-  # host = S.gethostbyname(S.gethostname())
-  print (host)
   sock = S.socket(S.AF_INET, S.SOCK_STREAM)
   result = sock.connect_ex((host, port))
   if result == 0:
