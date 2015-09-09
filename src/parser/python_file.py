@@ -6,8 +6,6 @@
 This File implements the specific code for handling a Python File.
 PreProcess of a file and scanning structure are defined here.
 """
-from pprint import *
-import pdb
 import re
 from .conf import *
 from .common import *
@@ -89,7 +87,6 @@ class PythonFile(File) :
         """Adds missing attributes used in a Python file"""
         super().process(fname, fpath)
         self.CCODE = self.__preProcess(self.ICODE) # clean code results of preprocess
-        # self.IDENT = self.__setIndent() # indentation size
         self.SCODE = self.scanCode(self.CCODE) # scan file content and returns code structure
 
 
@@ -175,10 +172,8 @@ class PythonFile(File) :
                 else : add(l) #sinon on l'ajoute a la structure générale
     ####
             #gestion des erreurs
-            except :
-                print ('error:', typ, lvl, l.show())
-                raise
-                return res
+            except Exception:
+                raise RuntimeError('Error while parsing file')
 
         # on met à jour les dernières lignes
         for x in res :

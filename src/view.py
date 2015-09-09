@@ -113,14 +113,21 @@ class PyOutline(QMainWindow):
         filepath, filename = os.path.split(fullpath)
 
         self.setWindowTitle(filename)
-        self.__data = PythonFile()
-        self.__data.process(filename, filepath + '/')
         self.model.setFileName(fullpath)
+
+        self.__data = PythonFile()
+        try:
+            self.__data.process(filename, filepath + '/')
+        except RuntimeError as em:
+            print('Error while parsing file: {}'.format(em))
+            self.showMessage('Sorry, an error has occurred while processing this file')
+
         try:
             self.model.setBranches(self.__data.getSymbolTree())
         except ValueError as em:
             print('Error while parsing tree: {}'.format(em))
             self.showMessage('Sorry, an error has occurred while processing this file')
+
         self.__tree.resizeColumnToContents(0)
 
     def setWindowTitle(self, *filename):
