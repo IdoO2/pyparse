@@ -8,10 +8,10 @@ DB_DIR=$WORKING_DIR'/src/parser/db'
 STRUCT=$DB_DIR'/struct.sql'
 DB_FILE=$DB_DIR'/db-symbol' # database default name
 
-if [ -f $DB_FILE ]
+if [ -f "$DB_FILE" ]
 then
   echo "delete previous $DB_FILE"
-  rm $DB_FILE
+  rm "$DB_FILE"
 fi
 
-sqlite3 -echo $DB_FILE < $STRUCT # build a new db using struct.sql
+sqlite3 -echo "$DB_FILE" < "$STRUCT" # build a new db using struct.sql
