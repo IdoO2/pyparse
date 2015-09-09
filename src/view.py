@@ -7,7 +7,8 @@ import sys
 import os
 from PyQt5.QtWidgets import (QTreeView, QApplication,
                             QMainWindow, QWidget, QVBoxLayout,
-                            QFileDialog, QAbstractItemView, QAction, qApp)
+                            QFileDialog, QAbstractItemView, QAction, qApp,
+                            QMessageBox)
 from threading import Thread
 from sublime_text.gui_side import SublimeServer, showSymb
 
@@ -140,11 +141,13 @@ class PyOutline(QMainWindow):
 
     def createXmi(self):
         """ Create XMI file """
+        msg = 'Sorry, we were unable to process your request'
         root = self.__basepath if self.__basepath != '' else os.getenv('HOME')
         filename, type = QFileDialog.getSaveFileName(self, 'Open file for inspection', root)
 
         path, name = os.path.split(filename)
         if not os.access(path, os.R_OK):
+            self.showMessage('Sorry, this file couldn’t be written to')
             return
 
         if self.__xmi is None:
@@ -152,13 +155,25 @@ class PyOutline(QMainWindow):
         try:
             self.__xmi.setTree(self.__data.getSymbolTree())
             self.__xmi.write(filename)
+            self.statusBar().showMessage('{} successfully written'.format(name), 6000)
+            return True
         except ValueError as em:
             print('bad format for data: {}'.format(em))
         except RuntimeError as em:
             print('should not be here: {}'.format(em))
         except OSError as em:
+            msg = 'Sorry, we were unable to write to this file'
             print('inform: problem writing file {}'.format(em))
-        self.statusBar().showMessage('{} successfully written'.format(name), 6000)
+        self.showMessage(msg)
+
+    def showMessage(self, text):
+        """ Display a message to the user
+
+            Only option is to say OK
+        """
+        dialog = QMessageBox(self)
+        dialog.setText(text)
+        dialog.exec_()
 
 # Launch application
 app = QApplication(sys.argv)
