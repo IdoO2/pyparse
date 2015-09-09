@@ -28,9 +28,8 @@ class DBC():
         try:
             self.DB_CURS.execute(sql)
             self.DB_CONN.commit()
-        except :
-            LOG('Issue while inserting data in db.')
-            LOG(sql)
+        except Exception as em:
+            LOG('Issue while inserting data in db: {}'.format(em))
             return False
         return True
 
@@ -38,9 +37,8 @@ class DBC():
         """Normalize Select query executions"""
         try:
             self.DB_CURS.execute(sql)
-        except :
-            LOG('Issue while retrieving data from db.')
-            LOG(sql)
+        except Exception as em:
+            LOG('Issue while retrieving data from db: {}'.format(em))
             return False
         return self.DB_CURS.fetchall()
 
