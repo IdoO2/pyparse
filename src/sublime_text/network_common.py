@@ -49,8 +49,8 @@ def initClient(host, port) :
     try:
       s = S.socket(family, socktype, proto)
       s.connect(sockaddr)
-    except S.error as e:
-      raise
+    except S.error as em:
+      raise RuntimeError(em)
 
   if s is None:
     print('could not open socket')
