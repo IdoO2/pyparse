@@ -66,6 +66,7 @@ class PyOutline(QMainWindow):
         self.setGeometry(450, 150, 400, 550)
         self.setCentralWidget(self.__tree)
         self.setWindowTitle()
+        self.statusBar()
         self.__buildMenu()
         self.model.setBranches([])
 
@@ -157,6 +158,7 @@ class PyOutline(QMainWindow):
             print('should not be here: {}'.format(em))
         except OSError as em:
             print('inform: problem writing file {}'.format(em))
+        self.statusBar().showMessage('{} successfully written'.format(name), 6000)
 
 # Launch application
 app = QApplication(sys.argv)
