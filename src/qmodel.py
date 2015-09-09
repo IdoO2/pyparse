@@ -15,6 +15,7 @@ class Tree(QStandardItemModel):
         QStandardItemModel.__init__(self)
         self.setColumnCount(2)
         self.setHorizontalHeaderLabels(['Symbol', 'Details'])
+        # Initialising with an empty tree is accepted
         if not tree:
             return
         self.__addBranches(tree)
@@ -38,7 +39,7 @@ class Tree(QStandardItemModel):
                 parent.appendRow([item, item_data])
                 self.__addBranches(branch[1:], item)
             else:
-                raise ValueError
+                raise ValueError('Misformatted tree')
 
     def __buildSymbolData(self, branch_data):
         """ Build a string from the attributes of given symbol"""
@@ -68,6 +69,6 @@ class Tree(QStandardItemModel):
         use with care
         """
         if not branches:
-            return
+            raise ValueError('`branches` parameter empty')
         self.clear()
         self.__addBranches(branches)

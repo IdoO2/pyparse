@@ -69,7 +69,6 @@ class PyOutline(QMainWindow):
         self.setWindowTitle()
         self.statusBar()
         self.__buildMenu()
-        self.model.setBranches([])
 
     def __buildMenu(self):
         """ Add menu bar elements
@@ -107,6 +106,8 @@ class PyOutline(QMainWindow):
         fullpath, type_ = QFileDialog.getOpenFileName(self, 'Open file for inspection', os.getenv('HOME'))
 
         if not os.path.isfile(fullpath) or not os.access(fullpath, os.R_OK):
+            self.showMessage('This file doesn’t appear to be valid')
+            print('Unable to open {}'.format(fullpath))
             return
 
         filepath, filename = os.path.split(fullpath)
@@ -115,7 +116,11 @@ class PyOutline(QMainWindow):
         self.__data = PythonFile()
         self.__data.process(filename, filepath + '/')
         self.model.setFileName(fullpath)
-        self.model.setBranches(self.__data.getSymbolTree())
+        try:
+            self.model.setBranches(self.__data.getSymbolTree())
+        except ValueError as em:
+            print('Error while parsing tree: {}'.format(em))
+            self.showMessage('Sorry, an error has occurred while processing this file')
         self.__tree.resizeColumnToContents(0)
 
     def setWindowTitle(self, *filename):
