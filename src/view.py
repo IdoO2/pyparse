@@ -9,8 +9,12 @@ from PyQt5.QtWidgets import (QTreeView, QApplication,
                             QMainWindow, QWidget, QVBoxLayout,
                             QFileDialog, QAbstractItemView, QAction, qApp,
                             QMessageBox)
-from threading import Thread
-from sublime_text.gui_side import SublimeServer, showSymb
+
+# ST mode specific
+st_mode = (len(sys.argv) == 2 and sys.argv[1] == '--sublime')
+if st_mode:
+    from threading import Thread
+    from sublime_text.gui_side import SublimeServer, showSymb
 
 # Application
 from qmodel import Tree
@@ -18,11 +22,18 @@ from parser.python_file import PythonFile
 from exporter import Xmi
 
 class PyTreeView(QTreeView) :
-    def mouseDoubleClickEvent (self, event) :
-        data = self.currentIndex().data()
-        res = re.findall('\[([^\]]*)\]', data)
-        if res :
-            showSymb(res[0])
+    __st_mode = False
+    def __init__(self, with_st):
+        super(QTreeView, self).__init__()
+        self.__st_mode = with_st
+
+    def mouseDoubleClickEvent(self, event):
+        if not self.__st_mode:
+            return
+        row_data = self.currentIndex().data()
+        line_nb = re.search('\[(\d*)\]', row_data)
+        if line_nb:
+            showSymb(line_nb.group(1))
 
 
 class PyOutline(QMainWindow):
@@ -31,13 +42,10 @@ class PyOutline(QMainWindow):
     __xmi = None
     __basepath = ''
 
-    def __init__(self):
+    def __init__(self, with_st):
         """ Create window, set parser and model instances
         """
         QMainWindow.__init__(self)
-
-        # is linked to st ?
-        self.stUse = False
 
         # Parser instance
         self.__data = PythonFile()
@@ -46,7 +54,7 @@ class PyOutline(QMainWindow):
         self.model = Tree([], '')
 
         # View
-        self.__tree = PyTreeView()
+        self.__tree = PyTreeView(with_st)
         self.__tree.setUniformRowHeights(True)
         self.__tree.setModel(self.model)
 
@@ -189,9 +197,9 @@ class PyOutline(QMainWindow):
 
 # Launch application
 app = QApplication(sys.argv)
-ui = PyOutline()
+ui = PyOutline(st_mode)
 
-if len(sys.argv) == 2 and sys.argv[1] == '-sublime' :
+if st_mode:
     server = SublimeServer(ui)
     thd = Thread(target=server.run)
     thd.setDaemon(True)
