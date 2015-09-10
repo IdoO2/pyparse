@@ -25,7 +25,6 @@ class SublimeServer(object) :
 
     def __init__ (self, UI) :
         self.UI = UI
-        self.UI.stUse = True
 
     def __process(self, data) :
         filename = data[0]

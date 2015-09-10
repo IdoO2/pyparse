@@ -2,25 +2,31 @@
 
 DBFILE='src/parser/db/db-symbol'
 
-if [ "$#" -eq 1 ] && [ "$1" == '-t' ] #run unit test
+# Run unit tests
+if [ "$#" -eq 1 ] && [ "$1" == '-t' ]
 then
-	for file in utests/*.py
-	do
-		python3 $file
-	done
+    for file in utests/*.py
+    do
+        python3 $file
+    done
+    exit 0
+fi
 
-elif [ "$#" -eq 1 ] && [ "$1" == '-st' ] #run unit with st
+# Assure db is present before running application
+if [ ! -f src/parser/db/db-symbol ]
 then
-  if [ ! -f src/parser/db/db-symbol ]
-  then
     sh init.sh
-  fi
-  python3 src/view.py -sublime
+fi
 
-else # run stand-alone mode
-	if [ ! -f $DBFILE -o ! -s $DBFILE ]
-	then
-		sh init.sh
-	fi
-	python3 src/view.py
+# Run with network to interact with ST
+if [ "$#" -eq 1 ] && [ "$1" == '-st' ]
+then
+    python3 src/view.py --sublime
+# Stand-alone mode
+else
+    if [ ! -f $DBFILE -o ! -s $DBFILE ]
+    then
+        sh init.sh
+    fi
+    python3 src/view.py
 fi
