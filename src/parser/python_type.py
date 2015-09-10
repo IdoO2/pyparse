@@ -26,10 +26,10 @@ RDIC = {
 
   'import_from': re.compile('from ([^ ]+) import *(\*|.+)'), #renvoie le module et ses éléments
   'import': re.compile('import ([^ ]+)'), #renvoie les modules
-  'class': re.compile('class ([^(\s:]+).([^)]*)'), #renvoie le nom d'une classe
+  'class': re.compile('class ([^\s\(:]*)[\( )]*([^):]*)'), #renvoie le nom d'une classe
   'class_attr': re.compile('self.([^ \(\)=]+) '), #renvoie le nom d'un attribut d'instance
   'fonction': re.compile('^def (.+(?=[(])).([^)]*)'), # #renvoie le nom d'une fonction et ses arguments
-  'method': re.compile('def ([^(]+).([^)]*)'), #identifie une méthode
+  'method': re.compile('def ([^\( ]+)[\( ]*([^\):]*)'), #identifie une méthode
   'variable': re.compile('([^[ =]+)'), #sélectionne le nom d'une variable
   'cl_comm': re.compile('\s,|,\s'), #selectionne les arguments quelque soit leur présentation
   'cl_idet': re.compile('[\t ]+'), #sélectionne l'indentation
@@ -52,7 +52,10 @@ class Import(Symbol) :
     def register(self, id_file, code) :
         """Register an Import symbol in database"""
         super().register(id_file, code)
-        self.analyze()
+        try :
+            self.analyze()
+        except :
+            pass
         self.update()
 
     def load(self, data) :
@@ -100,7 +103,10 @@ class Variable(Symbol) :
     def register(self, id_file, code) :
         """Register a Variable symbol in database"""
         super().register(id_file, code)
-        self.analyze()
+        try :
+            self.analyze()
+        except :
+            pass
         self.update()
 
     def load(self, data) :
@@ -137,7 +143,10 @@ class Function(Symbol) :
     def register(self, id_file, code) :
         """Register a Function symbol in database"""
         super().register(id_file, code)
-        self.analyze()
+        try :
+            self.analyze()
+        except :
+            pass
         self.update()
 
     def load(self, data) :
@@ -177,7 +186,10 @@ class Class(Symbol) :
     def register(self, id_file, code) :
         """Register a Class symbol in database"""
         super().register(id_file, code)
-        self.analyze()
+        try :
+            self.analyze()
+        except :
+            pass
         self.update()
 
     def load(self, data) :
@@ -226,7 +238,10 @@ class ClassAttribute(Symbol) :
         """Register a ClassAttribute symbol in database"""
         super().register(id_file, code)
         self.idclass = idclass
-        self.analyze()
+        try :
+            self.analyze()
+        except :
+            pass
         self.update()
 
     def load(self, data) :
@@ -276,7 +291,10 @@ class Method(Symbol) :
         """Register a ClassAttribute symbol in database"""
         super().register(id_file, code)
         self.idclass = idclass
-        self.analyze()
+        try :
+            self.analyze()
+        except :
+            pass
         self.update()
 
     def load(self, data) :

@@ -28,9 +28,8 @@ class DBC():
         try:
             self.DB_CURS.execute(sql)
             self.DB_CONN.commit()
-        except :
-            LOG('Issue while inserting data in db.')
-            LOG(sql)
+        except Exception as em:
+            LOG('Issue while inserting data in db: {}'.format(em))
             return False
         return True
 
@@ -38,9 +37,8 @@ class DBC():
         """Normalize Select query executions"""
         try:
             self.DB_CURS.execute(sql)
-        except :
-            LOG('Issue while retrieving data from db.')
-            LOG(sql)
+        except Exception as em:
+            LOG('Issue while retrieving data from db: {}'.format(em))
             return False
         return self.DB_CURS.fetchall()
 
@@ -144,15 +142,6 @@ class DBC():
                     # function
                     'WHEN s.id_type in (12, 13) THEN',
                         'f.name',
-                    # class
-                    'WHEN s.id_type = 14 THEN',
-                        'c.name',
-                    # class  method
-                    'WHEN s.id_type in (20, 21, 22, 23, 24, 25) THEN',
-                        'm.name',
-                    # class attribute
-                    'WHEN s.id_type = 30 THEN',
-                        'a.name',
                     "ELSE '-'",
                 'END as name,',
                 'CASE',
@@ -162,36 +151,83 @@ class DBC():
                     # function
                     'WHEN s.id_type in (12, 13) THEN',
                         'f.args',
-                    # class
-                    'WHEN s.id_type = 14 THEN',
-                        'c.legacy',
-                    # class  method
-                    'WHEN s.id_type in (20, 21, 22, 23, 24, 25) THEN',
-                        'm.args',
                     "ELSE NULL",
                 'END as args,',
-                'CASE',
-                    # class  method
-                    'WHEN s.id_type in (20, 21, 22, 23, 24, 25) THEN',
-                        'm.id_class',
-                    # class attribute
-                    'WHEN s.id_type = 30 THEN',
-                        'a.id_class',
-                    'ELSE NULL',
-                'END as parent',
+                'NULL as parent',
             'FROM symbol s',
             'LEFT OUTER JOIN symbol_type t on s.id_type = t.id_type',
             'LEFT OUTER JOIN import i on s.id_symbol = i.id_symbol',
             'LEFT OUTER JOIN variable v on s.id_symbol = v.id_symbol',
             'LEFT OUTER JOIN function f on s.id_symbol = f.id_symbol',
-            'LEFT OUTER JOIN class c on s.id_symbol = c.id_symbol',
-            'LEFT OUTER JOIN method m on s.id_symbol = m.id_symbol',
-            'LEFT OUTER JOIN class_attr a on s.id_symbol = a.id_symbol',
-            'WHERE s.id_file =',
-            str(file_id),
-            ';'
+            'WHERE s.id_file =', str(file_id),
+            'AND t.global_type in (\'import\', \'function\', \'variable\')'
+            'ORDER BY t.id_type, name;'
         ])
-        return self.__select(select)
+        arr = self.__select(select)
+
+
+        select = '\n'.join([
+            'SELECT',
+            '   s.id_symbol as id,',
+            '   s.ini_line as line,',
+            '   t.global_type as type,',
+            '   t.visibility as visibility,',
+            '   c.name as name,',
+            '   c.legacy as args,',
+            '   NULL as parent',
+            'FROM symbol s',
+            'LEFT OUTER JOIN symbol_type t on s.id_type = t.id_type',
+            'LEFT OUTER JOIN class c on s.id_symbol = c.id_symbol',
+            'WHERE s.id_file = ' + str(file_id) + ' AND t.global_type = \'class\'',
+            'ORDER BY c.name;'
+        ])
+        classes = self.__select(select)
+
+        for c in classes :
+            c_id = c[0]
+            select = '\n'.join([
+                'SELECT',
+                '   s.id_symbol as id,',
+                '   s.ini_line as line,',
+                '   t.global_type as type,',
+                '   t.visibility as visibility,',
+                'CASE',
+                '    WHEN s.id_type in (20, 21, 22, 23, 24, 25) THEN',
+                '        m.name',
+                '    WHEN s.id_type = 30 THEN',
+                '        a.name',
+                '    ELSE \'-\'',
+                'END as name,',
+
+                'CASE',
+                '    WHEN s.id_type in (20, 21, 22, 23, 24, 25) THEN',
+                '        m.args',
+                '    ELSE NULL',
+                'END as args,',
+
+                'CASE',
+                '    WHEN s.id_type in (20, 21, 22, 23, 24, 25) THEN',
+                '        m.id_class',
+                '    WHEN s.id_type = 30 THEN',
+                '        a.id_class',
+                '    ELSE NULL',
+                'END as parent',
+
+                'FROM',
+                '    symbol s',
+                '    LEFT OUTER JOIN symbol_type t on s.id_type = t.id_type',
+                '    LEFT OUTER JOIN method m on s.id_symbol = m.id_symbol',
+                '    LEFT OUTER JOIN class_attr a on s.id_symbol = a.id_symbol',
+
+                'WHERE',
+                '    s.id_file = ' + str(file_id),
+                '    AND parent = ' + str(c_id),
+                'ORDER BY type, visibility, name;'
+            ])
+            arr += [c]
+            arr += self.__select(select)
+
+        return arr
 
     def close(self):
         """Close database connection"""

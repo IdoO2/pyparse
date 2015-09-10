@@ -11,10 +11,12 @@ class Tree(QStandardItemModel):
     The method `addRow` should be delegated to TreeItem
     (ie self.invisibleRootItem should be instance of TreeItem)
     """
+    __columns = ['Symbol', 'Details (type, params, line)']
     def __init__(self, tree, filename):
         QStandardItemModel.__init__(self)
         self.setColumnCount(2)
-        self.setHorizontalHeaderLabels(['Symbol', 'Details'])
+        self.setHorizontalHeaderLabels(self.__columns)
+        # Initialising with an empty tree is accepted
         if not tree:
             return
         self.__addBranches(tree)
@@ -35,14 +37,13 @@ class Tree(QStandardItemModel):
             elif isinstance(branch, list):
                 item = QStandardItem(branch[0][0])
                 item_data = QStandardItem(self.__buildSymbolData(branch[0][1]))
-                parent.insertRow(0, [item, item_data])
+                parent.appendRow([item, item_data])
                 self.__addBranches(branch[1:], item)
             else:
-                raise ValueError
+                raise ValueError('Misformatted tree')
 
     def __buildSymbolData(self, branch_data):
-        """ Build a string from the attributes of given symbol
-        """
+        """ Build a string from the attributes of given symbol"""
         datastr = []
         if 'visibility' in branch_data:
             datastr.append(branch_data['visibility'])
@@ -51,6 +52,7 @@ class Tree(QStandardItemModel):
             signature = ', '.join(branch_data['signature'])
             if signature:
                 datastr.append('({})'.format(signature))
+        datastr.append('[{}]'.format(branch_data['line']))
         return ' '.join(datastr)
 
     def setFileName(self, filename):
@@ -59,7 +61,6 @@ class Tree(QStandardItemModel):
         """
         path, name = ospath.split(filename)
         title = 'Inspecting "{}" ({})'.format(name, path)
-        self.setHorizontalHeaderLabels([title])
 
     def setBranches(self, branches):
         """ Pass fully built tree to populate tree
@@ -68,6 +69,7 @@ class Tree(QStandardItemModel):
         use with care
         """
         if not branches:
-            return
+            raise ValueError('`branches` parameter empty')
         self.clear()
         self.__addBranches(branches)
+        self.setHorizontalHeaderLabels(self.__columns)

@@ -12,13 +12,21 @@ This file implements some constants providing facility for:
 
 import pdb
 import sys
-from os import getcwd, path
+import os
+
+
+### GETING PARENT DIRECTORY
+PARENT_DIR = ''
+for rep in os.getcwd().split(os.sep) :
+    PARENT_DIR += rep + os.sep
+    if rep == 'pyparse' : break
 
 ### SHORTCUT
 LOG = lambda msg: sys.stderr.write(msg + "\n") # print log on stderr
 DBG = pdb.set_trace                            # facility for calling the debugger
 
 ### CONSTANTES
-TEST_DIRECTORY = path.join(getcwd(), 'test')         # where some test file are store
-DB_SYMBOL = path.join(getcwd(), 'src/parser/db/db-symbol')   # where database is store
-DB_STRUCT = path.join(getcwd(), 'src/parser/db/struct.sql')  # where the data structure sql is stored
+DB_SYMBOL      = os.path.join(PARENT_DIR, 'src/parser/db/db-symbol')   # where database is store
+DB_STRUCT      = os.path.join(PARENT_DIR, 'src/parser/db/struct.sql')  # where the data structure sql is stored
+UNIT_DIRECTORY = os.path.join(PARENT_DIR, 'utests/')         # where unit test are stored
+TEST_DIRECTORY = UNIT_DIRECTORY + 'file/'         # where some test file are store

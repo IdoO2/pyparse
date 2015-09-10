@@ -1,3 +1,9 @@
+import sys
+import os
+sys.path.append(sys.path.append(\
+  os.sep.join(os.getcwd().split(os.sep)[:os.getcwd().split(os.sep).index('pyparse')]+['pyparse' + os.sep]))) #fixing python path
+
+
 from src.qmodel import Tree
 import unittest
 
@@ -12,7 +18,7 @@ class ModelTestCase(unittest.TestCase):
     ]
 
     def setUp(self):
-        self.tree = Tree([[('master', {'type': 'class'})]], '~/filename.py')
+        self.tree = Tree([[('master', {'type': 'class', 'line': 22})]], '~/filename.py')
 
     def test_setBranches(self):
         # Ill formatted tree

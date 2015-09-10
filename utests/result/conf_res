@@ -1,0 +1,7 @@
+[('pdb', {'line': 13, 'signature': [''], 'type': 'import'}),
+ ('sys', {'line': 14, 'signature': [''], 'type': 'import'}),
+ ('DBG', {'line': 18, 'type': 'variable'}),
+ ('DB_STRUCT', {'line': 23, 'type': 'variable'}),
+ ('DB_SYMBOL', {'line': 22, 'type': 'variable'}),
+ ('LOG', {'line': 17, 'type': 'variable'}),
+ ('TEST_DIRECTORY', {'line': 21, 'type': 'variable'})]

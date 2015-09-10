@@ -1,0 +1,2 @@
+[('a', {'line': 16, 'type': 'variable'}),
+ ('sing', {'line': 5, 'signature': ['b', 'end'], 'type': 'function'})]

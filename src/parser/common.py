@@ -10,6 +10,7 @@ This file implements 2 general class usable for every languages:
 
 from .db_toolkit import DBC
 from .conf import *
+import os
 import re
 
 class Symbol(object) :
@@ -38,6 +39,7 @@ class Symbol(object) :
         if not res : LOG('Err on register')
         else :
             self.id = self.__getID() # sets id when it's correctly registered
+            return True
 
     def __getID(self) :
         """Gets current file ID in database"""
@@ -63,7 +65,7 @@ class Symbol(object) :
         self.eline   = code.nline   # last line
         self.uline   = []           # array of lines using this symbol
         self.code    = [code]       # array of CodeLine instance: store the contains of the symbol
-        self.__save()               # database registration
+        return self.__save()               # database registration
 
 
     def show(self) :
@@ -77,6 +79,10 @@ class Symbol(object) :
         """Updates symbol end line when scanning is done"""
         values = [self.iline + len(self.code) - 1, self.id_file, self.iline]
         return self.DBC.updateEndLine(values)
+
+    def symbRepr(self) :
+        """return an array representative of current Symbol"""
+        return [str(self.id_file) + ' ' + str(self.iline) + ' [' + str(self.stype) + ']']
 
     def addCode(self, code) :
         """Add a instance of CodeLine to self.code array"""
@@ -101,10 +107,11 @@ class File(object) :
     ### PRIVATE METHODS
 
     def __setLineEndings(self, full_text):
-        """Set line endings (unix or windows)"""
-        res = re.findall('(\n|\c\r)', full_text)
-        if not res : return
-        return res[0]
+        """ Set line endings (unix or windows) """
+        le = re.search('(\n|\c\r)', full_text)
+        if not le:
+            raise RuntimeError('Unable to determine line endings type')
+        self.LINE_END = le.group()
 
     def __register(self) :
         """Register file in database"""
@@ -130,16 +137,19 @@ class File(object) :
 
     ### PUBLIC METHODS
 
-    def process(self, fname, fpath) :
+    def process(self, fname, fpath):
         """Process a file"""
-        fd            = open(fpath + fname, 'r')
-        code          = fd.read() # get file content
+        fullpath = fpath + fname
+        if not os.path.isfile(fullpath) or not os.access(fullpath, os.R_OK):
+            raise RuntimeError('File {} is not readable'.format(fullpath))
+        fd = open(fullpath, 'r')
+        code = fd.read() # get file content
         fd.close()
 
-        self.LINE_END = self.__setLineEndings(code) # set line ending style
-        self.FNAME    = fname  # file name
-        self.FPATH    = fpath  # file path
-        self.ICODE    = code   # initiale file content
+        self.__setLineEndings(code)
+        self.FNAME = fname # file name
+        self.FPATH = fpath # file path
+        self.ICODE = code # initiale file content
 
         self.__register() # register file in database
         self.ID = self.__getID() # get file ID

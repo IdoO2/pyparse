@@ -1,28 +1,40 @@
 #!/usr/bin/env python3.4
 #!-*- coding: utf8 -*-
 
-# Note on performance: in our case, consider setting `uniformRowHeights = True`
-
-# Helpers
-import inspect
-from pprint import pprint
-import pdb
-
 # Libraries
 import re
 import sys
 import os
 from PyQt5.QtWidgets import (QTreeView, QApplication,
                             QMainWindow, QWidget, QVBoxLayout,
-                            QFileDialog, QAbstractItemView, QAction, qApp)
-from PyQt5.QtCore import QDir, Qt, QStringListModel
-from PyQt5.QtGui import QIcon
+                            QFileDialog, QAbstractItemView, QAction, qApp,
+                            QMessageBox)
+
+# ST mode specific
+st_mode = (len(sys.argv) == 2 and sys.argv[1] == '--sublime')
+if st_mode:
+    from threading import Thread
+    from sublime_text.gui_side import SublimeServer, showSymb
 
 # Application
 from qmodel import Tree
 from parser.python_file import PythonFile
-from parser.db_toolkit import DBC
 from exporter import Xmi
+
+class PyTreeView(QTreeView) :
+    __st_mode = False
+    def __init__(self, with_st):
+        super(QTreeView, self).__init__()
+        self.__st_mode = with_st
+
+    def mouseDoubleClickEvent(self, event):
+        if not self.__st_mode:
+            return
+        row_data = self.currentIndex().data()
+        line_nb = re.search('\[(\d*)\]', row_data)
+        if line_nb:
+            showSymb(line_nb.group(1))
+
 
 class PyOutline(QMainWindow):
     """ Handles UI: creates window, layout, adds a tree """
@@ -30,7 +42,7 @@ class PyOutline(QMainWindow):
     __xmi = None
     __basepath = ''
 
-    def __init__(self):
+    def __init__(self, with_st):
         """ Create window, set parser and model instances
         """
         QMainWindow.__init__(self)
@@ -39,12 +51,12 @@ class PyOutline(QMainWindow):
         self.__data = PythonFile()
 
         # Model
-        self.__model = Tree([], '')
+        self.model = Tree([], '')
 
         # View
-        self.__tree = QTreeView()
+        self.__tree = PyTreeView(with_st)
         self.__tree.setUniformRowHeights(True)
-        self.__tree.setModel(self.__model)
+        self.__tree.setModel(self.model)
 
         # Window layout with tree
         self.__buildWindow()
@@ -63,8 +75,8 @@ class PyOutline(QMainWindow):
         self.setGeometry(450, 150, 400, 550)
         self.setCentralWidget(self.__tree)
         self.setWindowTitle()
+        self.statusBar()
         self.__buildMenu()
-        self.__model.setBranches(self.__data.getSymbolTree())
 
     def __buildMenu(self):
         """ Add menu bar elements
@@ -101,16 +113,32 @@ class PyOutline(QMainWindow):
         """
         fullpath, type_ = QFileDialog.getOpenFileName(self, 'Open file for inspection', os.getenv('HOME'))
 
+        if not fullpath:
+            return
+
         if not os.path.isfile(fullpath) or not os.access(fullpath, os.R_OK):
+            self.showMessage('This file doesn’t appear to be valid')
+            print('Unable to open `{}`'.format(fullpath))
             return
 
         filepath, filename = os.path.split(fullpath)
 
         self.setWindowTitle(filename)
+        self.model.setFileName(fullpath)
+
         self.__data = PythonFile()
-        self.__data.process(filename, filepath + '/')
-        self.__model.setFileName(fullpath)
-        self.__model.setBranches(self.__data.getSymbolTree())
+        try:
+            self.__data.process(filename, filepath + '/')
+        except RuntimeError as em:
+            print('Error while parsing file: {}'.format(em))
+            self.showMessage('Sorry, an error has occurred while processing this file')
+
+        try:
+            self.model.setBranches(self.__data.getSymbolTree())
+        except ValueError as em:
+            print('Error while parsing tree: {}'.format(em))
+            self.showMessage('Sorry, an error has occurred while processing this file')
+
         self.__tree.resizeColumnToContents(0)
 
     def setWindowTitle(self, *filename):
@@ -136,11 +164,13 @@ class PyOutline(QMainWindow):
 
     def createXmi(self):
         """ Create XMI file """
+        msg = 'Sorry, we were unable to process your request'
         root = self.__basepath if self.__basepath != '' else os.getenv('HOME')
         filename, type = QFileDialog.getSaveFileName(self, 'Open file for inspection', root)
 
         path, name = os.path.split(filename)
         if not os.access(path, os.R_OK):
+            self.showMessage('Sorry, this file couldn’t be written to')
             return
 
         if self.__xmi is None:
@@ -148,16 +178,36 @@ class PyOutline(QMainWindow):
         try:
             self.__xmi.setTree(self.__data.getSymbolTree())
             self.__xmi.write(filename)
+            self.statusBar().showMessage('{} successfully written'.format(name), 6000)
+            return True
         except ValueError as em:
             print('bad format for data: {}'.format(em))
         except RuntimeError as em:
             print('should not be here: {}'.format(em))
         except OSError as em:
+            msg = 'Sorry, we were unable to write to this file'
             print('inform: problem writing file {}'.format(em))
+        self.showMessage(msg)
+
+    def showMessage(self, text):
+        """ Display a message to the user
+
+            Only option is to say OK
+        """
+        dialog = QMessageBox(self)
+        dialog.setText(text)
+        dialog.exec_()
 
 # Launch application
 app = QApplication(sys.argv)
-ui = PyOutline()
+ui = PyOutline(st_mode)
+
+if st_mode:
+    server = SublimeServer(ui)
+    thd = Thread(target=server.run)
+    thd.setDaemon(True)
+    thd.start()
+
 ui.show()
 
 sys.exit(app.exec_())

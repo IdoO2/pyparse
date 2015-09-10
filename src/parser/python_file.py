@@ -6,8 +6,6 @@
 This File implements the specific code for handling a Python File.
 PreProcess of a file and scanning structure are defined here.
 """
-
-import pdb
 import re
 from .conf import *
 from .common import *
@@ -37,7 +35,7 @@ class PythonFile(File) :
             . tabulations are changed in whitespaces
             . multiline are changed in one line"""
         txt = self.__comment(txt)
-        self.IDENT = self.__setIndent(txt) # indentation size
+        self.IDENT = self.__setIndent(txt + '\n') # indentation size
         arr_txt = txt.replace('\t', ' ' * self.IDENT).split(self.LINE_END)
         i = 0
 
@@ -89,7 +87,6 @@ class PythonFile(File) :
         """Adds missing attributes used in a Python file"""
         super().process(fname, fpath)
         self.CCODE = self.__preProcess(self.ICODE) # clean code results of preprocess
-        # self.IDENT = self.__setIndent() # indentation size
         self.SCODE = self.scanCode(self.CCODE) # scan file content and returns code structure
 
 
@@ -165,6 +162,7 @@ class PythonFile(File) :
                 if typ == SYM_ATTR_CLASS : # si c'est un attribut de classe on l'ajoute au code de la classe
                     tmp = CDIC[typ]()
                     tmp.register(self.ID, l, clas().id)
+                    l.context = tmp.id
                     tmp.updateEline()
                     clas().addCode(l)
                     continue
@@ -174,10 +172,8 @@ class PythonFile(File) :
                 else : add(l) #sinon on l'ajoute a la structure générale
     ####
             #gestion des erreurs
-            except :
-                print ('error:', typ, lvl, l.show())
-                raise
-                return res
+            except Exception:
+                raise RuntimeError('Error while parsing file')
 
         # on met à jour les dernières lignes
         for x in res :
@@ -190,18 +186,23 @@ class PythonFile(File) :
 
             TODO: handle more than two levels (recurse)
         """
+        symb_map = {}
         tmp_tree = {}
         name = []
+        i = 0
         # symbol entries are: 0-id, 1-first line number, 2-type, 3-visibility, 4-name, 5-args, 6-parent
         if not symbols : return {}
 
-        for s in symbols:
+        while i < len(symbols) :
+            s = symbols[i]
+            symb_map.update({s[0]: i})
             if s[6] is None and str(s[4]) + str(s[6]) not in name :
-                tmp_tree[s[0]] = [s, {}]
+                tmp_tree[i] = [s, {}]
                 name.append(str(s[4]) + str(s[6]))
-            elif s[6] in tmp_tree and str(s[4]) + str(s[6]) not in name :
-                tmp_tree[s[6]][1][s[0]] = [s, {}]
+            elif s[6] in symb_map and str(s[4]) + str(s[6]) not in name :
+                tmp_tree[symb_map[s[6]]][1][i] = [s, {}]
                 name.append(str(s[4]) + str(s[6]))
+            i += 1
 
         return tmp_tree
 
@@ -214,25 +215,26 @@ class PythonFile(File) :
         getType = lambda x : x[2]
         getVisi = lambda x : x[3]
         getSign = lambda x : x[5].split('|')
+        getLine = lambda x : x[1]
 
         tree = []
         level = []
 
-        for l in tmp_tree:
+        for l in sorted(tmp_tree.keys()):
             symbol = tmp_tree[l][0]
 
             if not tmp_tree[l][1]:
                 if getType(symbol) in ['function', 'import'] :
                     tree.append(
-                        (getName(symbol), {'type': getType(symbol), 'signature': getSign(symbol)})
+                        (getName(symbol), {'type': getType(symbol), 'signature': getSign(symbol), 'line': getLine(symbol)})
                     )
                 else :
                     tree.append(
-                        (getName(symbol), {'type': getType(symbol)})
+                        (getName(symbol), {'type': getType(symbol), 'line': getLine(symbol)})
                     )
             else:
-                level = [(getName(symbol), {'type': symbol[2]})]
-                for k in tmp_tree[l][1]:
+                level = [(getName(symbol), {'type': symbol[2], 'line': symbol[1]})]
+                for k in sorted(tmp_tree[l][1].keys()) :
                     sub_symbol = tmp_tree[l][1][k][0]
 
                     if getType(sub_symbol) in ['method', 'constructor'] :
@@ -240,16 +242,23 @@ class PythonFile(File) :
                             (getName(sub_symbol), {
                                 'type': getType(sub_symbol),
                                 'visibility': getVisi(sub_symbol),
-                                'signature': getSign(sub_symbol)})
+                                'signature': getSign(sub_symbol),
+                                'line': getLine(sub_symbol)
+                            })
                         )
                     else :
                         level.append(
-                            (getName(sub_symbol), {'type': getType(sub_symbol), 'visibility': getVisi(sub_symbol)})
+                            (getName(sub_symbol), {
+                                'type': getType(sub_symbol),
+                                'visibility': getVisi(sub_symbol),
+                                'line': getLine(sub_symbol)
+                            })
                         )
 
                 tree.append(level)
 
         return tree
+
 
     def getSymbolTree(self):
         """ Return symbol tree for GUI"""
