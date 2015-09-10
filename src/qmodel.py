@@ -11,10 +11,11 @@ class Tree(QStandardItemModel):
     The method `addRow` should be delegated to TreeItem
     (ie self.invisibleRootItem should be instance of TreeItem)
     """
+    __columns = ['Symbol', 'Details (type, params, line)']
     def __init__(self, tree, filename):
         QStandardItemModel.__init__(self)
         self.setColumnCount(2)
-        self.setHorizontalHeaderLabels(['Symbol', 'Details'])
+        self.setHorizontalHeaderLabels(self.__columns)
         # Initialising with an empty tree is accepted
         if not tree:
             return
@@ -60,7 +61,6 @@ class Tree(QStandardItemModel):
         """
         path, name = ospath.split(filename)
         title = 'Inspecting "{}" ({})'.format(name, path)
-        self.setHorizontalHeaderLabels([title])
 
     def setBranches(self, branches):
         """ Pass fully built tree to populate tree
@@ -72,3 +72,4 @@ class Tree(QStandardItemModel):
             raise ValueError('`branches` parameter empty')
         self.clear()
         self.__addBranches(branches)
+        self.setHorizontalHeaderLabels(self.__columns)
