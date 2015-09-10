@@ -13,13 +13,13 @@ import src.sublime_text.network_common as NC
 
 
 def showSymb(line) :
-    s = NC.initClient("127.0.0.1", 1254)
-    qry = 'SHOW' + str(line)
     try:
-        s.sendall((qry + '\n').encode('utf-8'))
+        s = NC.initClient("127.0.0.1", 1254)
+        query = 'SHOW{}\n'.format(line).encode('utf-8')
+        s.sendall(query)
+        s.close()
     except RuntimeError as em:
         print('Connection error: {}'.format(em))
-    s.close()
 
 class SublimeServer(object) :
 

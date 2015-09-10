@@ -113,9 +113,12 @@ class PyOutline(QMainWindow):
         """
         fullpath, type_ = QFileDialog.getOpenFileName(self, 'Open file for inspection', os.getenv('HOME'))
 
+        if not fullpath:
+            return
+
         if not os.path.isfile(fullpath) or not os.access(fullpath, os.R_OK):
             self.showMessage('This file doesn’t appear to be valid')
-            print('Unable to open {}'.format(fullpath))
+            print('Unable to open `{}`'.format(fullpath))
             return
 
         filepath, filename = os.path.split(fullpath)
