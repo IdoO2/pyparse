@@ -110,8 +110,9 @@ class File(object) :
         """ Set line endings (unix or windows) """
         le = re.search('(\n|\c\r)', full_text)
         if not le:
-            raise RuntimeError('Unable to determine line endings type')
-        self.LINE_END = le.group()
+            LOG('Unable to determine line endings type')
+            self.LINE_END = '\n'
+        else : self.LINE_END = le.group()
 
     def __register(self) :
         """Register file in database"""
@@ -140,6 +141,7 @@ class File(object) :
     def process(self, fname, fpath):
         """Process a file"""
         fullpath = fpath + fname
+        print('fullpath:', fullpath, 'fpath;', fpath, 'fname:', fname)
         if not os.path.isfile(fullpath) or not os.access(fullpath, os.R_OK):
             raise RuntimeError('File {} is not readable'.format(fullpath))
         fd = open(fullpath, 'r')
