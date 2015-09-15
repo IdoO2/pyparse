@@ -7,4 +7,4 @@ TARGET=$HOME'/.config/sublime-text-3/Packages'
 
 # Create package dir
 cp -r src/sublime_text/PyParsePackage $TARGET
-
+echo 'install OK'
