@@ -68,8 +68,8 @@ class CommonTestCase(unittest.TestCase):
         dbc.reset()
         test = PythonFile()
         test.process('complex.py', TEST_DIRECTORY)
-        res = [test.FNAME, test.FPATH, len(test.ICODE), len(test.SCODE), test.ID]
-        arr = ['complex.py', '/home/tuxcy/src/pyparse/utests/file/', 10303, 79, 1]
+        res = [test.FNAME, len(test.ICODE), len(test.SCODE), test.ID]
+        arr = ['complex.py', 10303, 79, 1]
         self.assertEqual(res, arr)
 #### END FILE
 
