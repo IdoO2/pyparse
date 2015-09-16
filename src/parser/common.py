@@ -141,7 +141,6 @@ class File(object) :
     def process(self, fname, fpath):
         """Process a file"""
         fullpath = fpath + fname
-        print('fullpath:', fullpath, 'fpath;', fpath, 'fname:', fname)
         if not os.path.isfile(fullpath) or not os.access(fullpath, os.R_OK):
             raise RuntimeError('File {} is not readable'.format(fullpath))
         fd = open(fullpath, 'r')
